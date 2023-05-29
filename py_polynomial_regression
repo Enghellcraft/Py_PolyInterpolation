@@ -1,0 +1,246 @@
+import numpy as np
+from scipy.interpolate import lagrange
+
+coefs = []
+
+# Funs
+def my_lagrange(x_values, y_values, x_new):
+    #Where x_values are the values from dataset X
+    # y_values are the values from dataset Y
+    # x_new are the new values
+    
+    if len(x_values) != len(y_values):
+        raise ValueError("x_values e y_values deben tener la misma")
+    result = 0
+    for i, x_i in enumerate(x_values):
+        l_i = np.prod([(x_new - x_values[j])/(x_i - x_values[j]) for j in range(len(x_values)) if j != i])
+        coefs.append(l_i)
+        result += l_i * y_values[i]
+    return result
+
+# Dataset Parables
+x = np.array([0, 1, 2])
+y = np.array([1, 3, -2])
+
+poly = lagrange(x, y)
+print(np.poly1d(poly))
+
+x_eval = [0, 1, 2]
+for x_i in x_eval:
+    print(f"Los valores por Lagrange son x = {x_i}: y = {my_lagrange(x, y, x_i)}")
+    
+# Dataset Linear
+x = np.array([0, 1, 2])
+y = np.array([1, 2, 3])
+
+poly = lagrange(x, y)
+print(np.poly1d(poly))
+
+x_eval = [0, 1, 2]
+for x_i in x_eval:
+    print(f"Los valores por Lagrange son x = {x_i}: y = {my_lagrange(x, y, x_i)}")
+    
+# Dataset gr P = 0
+##Debe ser una escala aritmetica:
+# sucesión de números tales que la
+# diferencia de cualquier par de términos sucesivos de la secuencia es constante
+# Para este caso debe ser monotona constante
+x = np.array([0, 1, 2])
+y = np.array([1, 1, 1])
+
+poly = lagrange(x, y)
+print(np.poly1d(poly))
+
+x_eval = [0, 1, 2]
+for x_i in x_eval:
+    print(f"Los valores por Lagrange son x = {x_i}: y = {my_lagrange(x, y, x_i)}")
+    
+# Dataset gr P = 1
+# Debe ser una escala aritmetica:
+# sucesión de números tales que la
+# diferencia de cualquier par de términos sucesivos de la secuencia es constante
+# Para este caso debe ser monotona creciente o monotona decreciente
+x = np.array([0, 1, 2])
+y = np.array([1, 2, 3])
+
+poly = lagrange(x, y)
+print(np.poly1d(poly))
+
+x_eval = [0, 1, 2]
+for x_i in x_eval:
+    print(f"Los valores por Lagrange son x = {x_i}: y = {my_lagrange(x, y, x_i)}")
+    
+# El maximo gr P corresponde a gr(P+Q) <= máx(gr P, gr Q)
+
+# Dataset Errors
+x = np.array([0, 1, 2])
+y = np.array([1, 2, 3])
+
+poly = lagrange(x, y)
+print(np.poly1d(poly))
+
+x_eval = [0, 1, 2]
+for x_i in x_eval:
+    print(f"Los valores por Lagrange son x = {x_i}: y = {my_lagrange(x, y, x_i)}")
+    
+# Dataset Fine
+x = np.array([0, 1, 2])
+y = np.array([3, 4, 5])
+
+poly = lagrange(x, y)
+print(np.poly1d(poly))
+
+x_eval = [0, 1, 2]
+for x_i in x_eval:
+    print(f"Los valores por Lagrange son x = {x_i}: y = {my_lagrange(x, y, x_i)}")
+
+# Se puede sumar esa constante al polinomio
+
+# Dataset Errors
+x = np.array([0, 1, 2])
+y = np.array([1, 2, 3])
+
+poly = lagrange(x, y)
+print(np.poly1d(poly))
+
+x_eval = [0, 1, 2]
+for x_i in x_eval:
+    print(f"Los valores por Lagrange son x = {x_i}: y = {my_lagrange(x, y, x_i)}")
+    
+# Dataset Fine
+x = np.array([3, 4, 5])
+y = np.array([1, 2, 3])
+
+poly = lagrange(x, y)
+print(np.poly1d(poly))
+
+x_eval = [0, 1, 2]
+for x_i in x_eval:
+    print(f"Los valores por Lagrange son x = {x_i}: y = {my_lagrange(x, y, x_i)}")
+    
+# Si X set esta corrido positivo, se lo resta al polinomio
+
+# Dataset Fine
+x = np.array([-2, -1, 0])
+y = np.array([1, 2, 3])
+
+poly = lagrange(x, y)
+print(np.poly1d(poly))
+
+x_eval = [0, 1, 2]
+for x_i in x_eval:
+    print(f"Los valores por Lagrange son x = {x_i}: y = {my_lagrange(x, y, x_i)}")
+    
+# Si x set esta corrido a negativo, se lo suma al polinomio
+    
+    
+# Funs
+def my_divided_diff(x, y):
+    # takes X and Y from the dataset given
+    n = len(y)
+    
+    # creates a matrix, the size of one variable data (datapoints),containing zeros
+    coef = np.zeros([n, n])
+    
+    # sets Y values of dataset to the first column
+    coef[:,0] = y
+    
+    # iterates through the second column 
+    for j in range(1,n):
+        for i in range(n-j):
+            # calculates the jth divided difference coefficient
+            coef[i][j] = \
+           (coef[i+1][j-1] - coef[i][j-1]) / (x[i+j]-x[i])
+           
+    # returns matrix of coefficients        
+    return coef
+
+def my_newton_poly(coef, x_data, x):
+# where coef is a matrix of coefficients from my_divided_diff
+# x_data is the array of x values of the dataset
+# x is the array of new X values to witch the Newton poly will evaluate
+
+    n = len(x_data) - 1 
+    
+    # initialized in the last coefficient of the matrix
+    p = coef[n]
+    #poly_str = str(p)
+    
+    # iterates reversely through the matrix
+    for k in range(1,n+1):
+        # for each coefficient, updates p
+        p = coef[n-k] + (x -x_data[n-k])*p
+        
+        # returns polynomial
+       # poly_str = f"{coef[n-k]:+}" + poly_str + f"({x-x_data[n-k]})"
+    return p #poly_str
+
+# Dataset
+x = np.array([0, 1, 2, 3])
+y = np.array([1, 1, 1, 2])
+
+# get the divided difference coef first row
+a_s = my_divided_diff(x, y)[0, :]
+
+# new values stored
+newton_poly_str = np.poly1d(a_s[::-1])
+
+# a) 
+print(newton_poly_str)
+
+x_eval = [0, 1, 2, 3, -1, 2, 4]
+for x_i in x_eval:
+    y_i = my_newton_poly(a_s, x, x_i)
+    print(f"Los valores por Newton son x = {x_i}: y = {y_i}")
+    
+    
+    
+# Tanto el método de Lagrange como el de Newton son técnicas utilizadas en cálculo
+# para aproximar una función desconocida a partir de un conjunto finito de puntos
+# conocidos. El método de Lagrange se utiliza para la interpolación de datos y el 
+# de Newton se utiliza para la interpolación y extrapolación de datos.
+
+#El método de Lagrange utiliza una fórmula de interpolación que se basa en las 
+# ordenadas de una función y no en las diferencias divididas como lo hace el método
+# de Newton [2]. El método de Lagrange se utiliza para encontrar una función que 
+# pase por un conjunto de puntos conocidos de una manera suave y continua.
+# Para encontrar esta función, se utiliza una función polinómica que pasa por 
+# cada uno de los puntos conocidos. La fórmula de interpolación de Lagrange se 
+# puede escribir como:
+#Pn(x)=∑i=0nyiLi(x)
+
+#Donde Pn(x) es la función polinómica que se ajusta a los puntos conocidos, yi es la
+# ordenada correspondiente al punto xi, y Li(x) es la función de Lagrange, definida 
+# como:
+#Li(x)=∏j=0,j≠inx−xjxi−xj
+
+#La ventaja del método de Lagrange es que es fácil de entender y aplicar. Sin embargo,
+# su principal limitación es que no es eficiente para grandes conjuntos de datos.
+
+#Por otro lado, el método de Newton utiliza un polinomio interpolante que se escribe
+# como una suma de términos que involucran las diferencias divididas de los puntos 
+# conocidos. El polinomio interpolante de Newton se puede escribir como:
+#Pn(x)=f[x0]+f[x0,x1](x−x0)+f[x0,x1,x2](x−x0)(x−x1)+⋯+f[x0,x1,…,xn](x−x0)(x−x1)⋯(x−xn−1)
+
+#Donde f[x0,x1,…,xn] es la diferencia dividida de orden n y f[xi] es la función 
+# evaluada en el punto xi [3].
+
+#La ventaja del método de Newton es que es más eficiente que el método de Lagrange 
+# para grandes conjuntos de datos. Además, el método de Newton se puede utilizar 
+# para la interpolación y extrapolación de datos, mientras que el método de Lagrange 
+# solo se utiliza para la interpolación [3].
+
+#Ambos métodos generalizan la propiedad euclidiana de que por dos puntos distintos
+# pasa siempre una (única) recta, ya que permiten encontrar una función polinómica 
+# que pase por un conjunto de puntos conocidos de una manera suave y continua. Sin 
+# embargo, cada método tiene sus ventajas y desventajas, y el método que se elige 
+# dependerá del conjunto de datos que se esté analizando.
+
+#En resumen, el método de Lagrange se utiliza para la interpolación de datos y se
+# basa en una fórmula de interpolación que se basa en las ordenadas de una función,
+# mientras que el método de Newton se utiliza para la interpolación y extrapolación
+# de datos y se basa en un polinomio interpolante que se escribe como una suma de
+# términos que involucran las diferencias divididas de los puntos conocidos. Ambos 
+# métodos permiten encontrar una función polinómica que pase por un conjunto de puntos
+# conocidos de una manera suave y continua, generalizando la propiedad euclidiana de
+# que por dos puntos distintos pasa siempre una (única) recta.
