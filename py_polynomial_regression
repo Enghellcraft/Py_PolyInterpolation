@@ -10,6 +10,29 @@ from scipy.interpolate import lagrange
 coefs = []
 
 # Funs
+def my_newton_poly(coef, x_data, x):
+# where coef is a matrix of coefficients from my_divided_diff
+# x_data is the array of x values of the dataset
+# x is the array of new X values to witch the Newton poly will evaluate
+
+    n = len(x_data) - 1 
+    
+    # initialized in the last coefficient of the matrix
+    p = coef[n]
+    #poly_str = str(p)
+    
+    # iterates reversely through the matrix
+    for k in range(1,n+1):
+        # for each coefficient, updates p
+        p = coef[n-k] + (x -x_data[n-k])*p
+        
+        # returns polynomial
+       # poly_str = f"{coef[n-k]:+}" + poly_str + f"({x-x_data[n-k]})"
+    return p #poly_str
+
+
+
+
 def my_lagrange(x_values, y_values, x_new):
     #Where x_values are the values from dataset X
     # y_values are the values from dataset Y
@@ -23,6 +46,22 @@ def my_lagrange(x_values, y_values, x_new):
         coefs.append(l_i)
         result += l_i * y_values[i]
     return result
+
+# Funcion generadora de 20 pares de numeros enteros aleatorios
+# ordenados de manera ascendente 
+def generador_pares(cota_minima, cota_maxima):
+    pares = np.random.randint(cota_minima, cota_maxima, size=(20, 2))
+    return sorted(pares, key=lambda x: x[0])
+
+def separador_pares_x_y(pares):
+    print()
+    pares_x = []
+    pares_y = []
+    for i in range(len(pares)):
+        pares_x.append(pares[i][0])
+        pares_y.append(pares[i][1])
+    return pares_x, pares_y      
+
 
 # Dataset Parables
 x = np.array([0, 1, 2])
@@ -161,25 +200,77 @@ def my_divided_diff(x, y):
     # returns matrix of coefficients        
     return coef
 
-def my_newton_poly(coef, x_data, x):
-# where coef is a matrix of coefficients from my_divided_diff
-# x_data is the array of x values of the dataset
-# x is the array of new X values to witch the Newton poly will evaluate
+# Newton divided difference formula 
+  
+# Function to find the product term 
+def proterm(i, value, x): 
+    pro = 1; 
+    for j in range(i): 
+        pro = pro * (value - x[j]); 
+    return pro; 
+  
+# Function for calculating 
+# divided difference table 
+def dividedDiffTable(x, y, n):
+  
+    for i in range(1, n): 
+        for j in range(n - i): 
+            y[j][i] = ((y[j][i - 1] - y[j + 1][i - 1]) /
+                                     (x[j] - x[i + j]));
+    return y;
+  
+# Function for applying Newton's 
+# divided difference formula 
+def applyFormula(value, x, y, n): 
+  
+    sum = y[0][0]; 
+  
+    for i in range(1, n):
+        sum = sum + (proterm(i, value, x) * y[0][i]); 
+      
+    return sum; 
+  
+# Function for displaying divided 
+# difference table 
+def printDiffTable(y, n): 
+  
+    for i in range(n): 
+        for j in range(n - i): 
+            print(round(y[i][j], 4), "\t", 
+                               end = " "); 
+  
+        print(""); 
+  
+# Driver Code
+  
+# number of inputs given 
+n = 4; 
+y = [[0 for i in range(10)] 
+        for j in range(10)]; 
+x = [ 5, 6, 9, 11 ]; 
+  
+# y[][] is used for divided difference 
+# table where y[][0] is used for input 
+y[0][0] = 12; 
+y[1][0] = 13; 
+y[2][0] = 14; 
+y[3][0] = 16; 
+  
+# calculating divided difference table 
+y=dividedDiffTable(x, y, n); 
+  
+# displaying divided difference table 
+printDiffTable(y, n); 
+  
+# value to be interpolated 
+value = 7; 
+  
+# printing the value 
+print("\nValue at", value, "is",
+        round(applyFormula(value, x, y, n), 2))
 
-    n = len(x_data) - 1 
-    
-    # initialized in the last coefficient of the matrix
-    p = coef[n]
-    #poly_str = str(p)
-    
-    # iterates reversely through the matrix
-    for k in range(1,n+1):
-        # for each coefficient, updates p
-        p = coef[n-k] + (x -x_data[n-k])*p
-        
-        # returns polynomial
-       # poly_str = f"{coef[n-k]:+}" + poly_str + f"({x-x_data[n-k]})"
-    return p #poly_str
+
+
 
 # Dataset
 x = np.array([0, 1, 2, 3])
@@ -241,66 +332,90 @@ print("*************************************************************************
 print("*                                      TEORIA                                    *")
 print("**********************************************************************************")
 print(" Los Métodos de Interpolación son técnicas utilizadas en cálculo para aproximar una")
-print(" función desconocida a partir de un conjunto finito de puntos conocidos           ")
+print(" función desconocida a partir de un conjunto finito de puntos conocidos, hallando ")
+print(" un polinomio de grado mínimo que pase por esos puntos                            ")
 print("                                                                                  ")
 print("                             ********* NEWTON *********                           ")
-print(" función desconocida a partir de un conjunto finito de puntos conocidos           ")
+print(" El método de Newton utiliza un polinomio interpolante que se construye como una  ")
+print(" suma de términos de los polinomios conocidos a los que se agrega el producto entre ")
+print(" una constante y las raices de los puntos hasta allí utilizados en el polinomio.  ")
+print(" Logicamente el primer polinomio es de grado cero, es decir una constante y       ")
+print(" Teniendo un polinomio Pm(x) con varios puntos tomados en cuenta, podriamos agregar")
+print(" el siguiente punto como: Pm+1(x) = P(x) + c * (x - x0) (x - x1) ... (x - xm)     ")
+print(" Donde cada valor de x0, x1 ... xm, representan los valores que anulan al segundo ")
+print(" término, para usar el polinomio anterior que se ajustaba a dichos puntos del set")
+print(" C es una conmstante que despejada en cada nuevo polinomio, tiene formato:        ")
+print("                 ym+1 - Pm(xm+1)                                                  ")
+print(" C = ________________________________________                                     ")
+print("     (xm+1 - x0) * (xm+1 - x0) *  (xm+1 - x0)                                     ")
+print(" Donde ym+1 es el valor correspondiente al par de xm+1, y Pm(xm+1) es el polinomio")
+print(" anterior evaluado en el x del set actual: xm+1                                   ")
+print(" La cantidad de datos (n) condiciona el grado del polinomio (P):  gr(P) <= n      ")
 print("                                                                                  ")
-# El método de Lagrange se utiliza para encontrar una función que 
-# pase por un conjunto de puntos conocidos de una manera suave y continua.
-# Para encontrar esta función, se utiliza una función polinómica que pasa por 
-# cada uno de los puntos conocidos. La fórmula de interpolación de Lagrange se 
-# puede escribir como:
-#Pn(x)=∑i=0nyiLi(x)
-
-#Donde Pn(x) es la función polinómica que se ajusta a los puntos conocidos, yi es la
-# ordenada correspondiente al punto xi, y Li(x) es la función de Lagrange, definida 
-# como:
-#Li(x)=∏j=0,j≠inx−xjxi−xj
-
-#Por otro lado, el método de Newton utiliza un polinomio interpolante que se escribe
-# como una suma de términos que involucran las diferencias divididas de los puntos 
-# conocidos. El polinomio interpolante de Newton se puede escribir como:
-#Pn(x)=f[x0]+f[x0,x1](x−x0)+f[x0,x1,x2](x−x0)(x−x1)+⋯+f[x0,x1,…,xn](x−x0)(x−x1)⋯(x−xn−1)
-#Donde f[x0,x1,…,xn] es la diferencia dividida de orden n y f[xi] es la función 
-# evaluada en el punto xi .
-
+print("                           ********* LAGRANGE *********                          ")
+print(" El método de Lagrange utiliza un polinomio interpolante que se construye como una")
+print(" suma de polinomios para cada uno de los puntos del set:                          ")
+print(" P(x) = L0(x) y0 + L1(x) y1 + … + Ln(x) yn                                        ")
+print(" Donde cada polinomio de lagrange ( L ) evaluado en cada punto del set, puede ser ")
+print(" expresado genéricamente como:                                                    ")
+print("            (x - x0) * (x - x1) ..... ( x - xn )                                  ")
+print(" Li(x) = _________________________________________                                ")
+print("            (xi - x0) * (xi - x1) .... (xi - xn)                                  ")
+print(" En el demonimador ueda logicamente una constante que depende del valor evaluado  ")
+print(" y en el numerador las variables que permiten hacer el polinomio.                 ")
+print(" La cantidad de datos (n) condiciona el grado del polinomio (P):  gr(P) <= n      ")
+print("                                                                                  ")
+print("                     ********* DIFERENCIAS DIVIDIDAS *********                    ")
+print(" El método de Diferencias Divididas utiliza un polinomio interpolante que se      ")
+print(" construye como una sumatoria de diferencias dvididas, según sea:                 ")
+print(" • Progresivo:                                                                    ")
+print(" Pn−1(x) = f [x0] + f [x0, x1] * (x − x0) + f [x0, x1, x2] * (x − x0) * (x − x1) ···")
+print(" .... + f [x0, x1, ... , xn] · (x − x0) · (x − x1) ... (x − xn−1)                 ")
+print(" • Regresivo:                                                                    ")
+print(" Pn−1(x) = f [xn] + f [xn, xn−1] * (x − xn) + f [xn, xn−1, xn−2] * (x − xn) * (x − xn−1)")
+print(" .... + f [xn, xn−1, ... , x1] * (x − xn) · (x − xn−1) ... (x − x1)                ")
+print(" Donde se toma todo el dataset y se realiza las diferencias divididas de todos.   ")
+print(" En ambos casos el resultado debería ser igual o similar.                         ")
+print("                                                                                  ")
 
 ## II) Examples
 print("                                                                                  ")
 print("**********************************************************************************")
 print("*                                    EJEMPLOS                                    *")
 print("**********************************************************************************")
+
 print("                                                                                  ") 
 
-
+# Llamamos a la funcion para generar los 20 pares aleatorios e imprimimos en pantalla
+pares_aleatorios = generador_pares(0, 10)
+print("Los 20 pares generados aleatoriamente son: ")
+for i in range(len(pares_aleatorios)):
+    print(pares_aleatorios[i])
+pares_x, pares_y = separador_pares_x_y(pares_aleatorios)
+print(" Los elementos x son: \n", pares_x)
+print("Los elementos y son: \n", pares_y)
 
 ## IV) Conclusions
 print("                                                                                  ")
 print("**********************************************************************************")
 print("*                                  CONCLUSIONES                                  *")
 print("**********************************************************************************")
-#El método de Lagrange utiliza una fórmula de interpolación que se basa en las 
-# ordenadas de una función y no en las diferencias divididas como lo hace el método
-# de Newton .
-#La ventaja del método de Lagrange es que es fácil de entender y aplicar. Sin embargo,
-# su principal limitación es que no es eficiente para grandes conjuntos de datos.
-#La ventaja del método de Newton es que es más eficiente que el método de Lagrange 
-# para grandes conjuntos de datos. Además, el método de Newton se puede utilizar 
-# para la interpolación y extrapolación de datos, mientras que el método de Lagrange 
-# solo se utiliza para la interpolación .
-#Ambos métodos generalizan la propiedad euclidiana de que por dos puntos distintos
-# pasa siempre una (única) recta, ya que permiten encontrar una función polinómica 
-# que pase por un conjunto de puntos conocidos de una manera suave y continua. Sin 
-# embargo, cada método tiene sus ventajas y desventajas, y el método que se elige 
-# dependerá del conjunto de datos que se esté analizando.
-
-#En resumen, el método de Lagrange se utiliza para la interpolación de datos y se
-# basa en una fórmula de interpolación que se basa en las ordenadas de una función,
-# mientras que el método de Newton se utiliza para la interpolación y extrapolación
-# de datos y se basa en un polinomio interpolante que se escribe como una suma de
-# términos que involucran las diferencias divididas de los puntos conocidos. Ambos 
-# métodos permiten encontrar una función polinómica que pase por un conjunto de puntos
-# conocidos de una manera suave y continua, generalizando la propiedad euclidiana de
-# que por dos puntos distintos pasa siempre una (única) recta.
+print(" • El método de Lagrange utiliza una fórmula de interpolación que se basa en las  ")
+print("   ordenadas de una función en cambio Newton y Diferencias Divididas requieren las")
+print("   ordenadas y absisas para su desarrollo.                                        ")
+print("                                                                                  ")
+print(" • El método de Lagrange solo se utiliza para la interpolación, mientras que el de")
+print("   Newton y Diferencias Divididas se pueden utilizar para interpolación y extrapolación.") 
+print("                                                                                  ")
+print(" • La ventaja del método de Lagrange es que es fácil de entender y aplicar.       ")
+print("   Sin embargo, no es eficiente para grandes conjuntos de datos (limitación).     ")                                     
+print("                                                                                  ")
+print(" • La ventaja del método de Diferencias Divididas es que es sencillo y no hay que ")
+print("   recalcular coeficientes. Sin embargo, tiene que tener suficiente presición para") 
+print("   entenderse y no permite cambios muy grandes (por su similitud con derivadas).  ")                                      
+print("                                                                                  ")
+print(" • Los tres métodos permiten encontrar una función polinómica que pase por un     ")
+print("   conjunto de puntos de manera continua, generalizando la propiedad euclidiana de") 
+print("   que por dos puntos distintos pasa siempre una (única) recta.                   ")                                      
+print("                                                                                  ")
 print("                                                                                  ") 
