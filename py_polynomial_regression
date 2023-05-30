@@ -1,3 +1,9 @@
+# TP Métodos Numéricos - 2023
+# Alumnos: 
+#          • Bianchi, Guillermo
+#          • Martin, Denise
+#          • Nava, Alejandro
+
 import numpy as np
 from scipy.interpolate import lagrange
 
@@ -192,17 +198,55 @@ x_eval = [0, 1, 2, 3, -1, 2, 4]
 for x_i in x_eval:
     y_i = my_newton_poly(a_s, x, x_i)
     print(f"Los valores por Newton son x = {x_i}: y = {y_i}")
-    
-    
-    
-# Tanto el método de Lagrange como el de Newton son técnicas utilizadas en cálculo
-# para aproximar una función desconocida a partir de un conjunto finito de puntos
-# conocidos. El método de Lagrange se utiliza para la interpolación de datos y el 
-# de Newton se utiliza para la interpolación y extrapolación de datos.
 
-#El método de Lagrange utiliza una fórmula de interpolación que se basa en las 
-# ordenadas de una función y no en las diferencias divididas como lo hace el método
-# de Newton [2]. El método de Lagrange se utiliza para encontrar una función que 
+
+# Prints
+## null) Task + Pres
+print("                                                                                  ")
+print("**********************************************************************************")
+print("*            METODOS NUMERICOS - 2023 - TP METODOs DE INTERPOLACION              *")
+print("**********************************************************************************")
+print("    ALUMNOS:                                                                      ")
+print("            • Bianchi, Guillermo                                                  ")
+print("            • Martin, Denise                                                      ")
+print("            • Nava, Alejandro                                                     ")
+print("                                                                                  ")
+print("**********************************************************************************")
+print("*                                   OBJETIVO                                     *")
+print("**********************************************************************************")
+print("  Lograr un polinomio interpolador                                                ")
+print("                                                                                  ")
+print("**********************************************************************************")
+print("*                                   CONSIGNAS                                    *")
+print("**********************************************************************************")
+print("  Se trabaja con 20 pares de números elegidos al azar, (x, y)                     ")
+print("                                                                                  ")
+print("  1) Primero establecer cotas para los mismos, generar 20 pares de números con    ")
+print("  esas cotas. Ordenar los pares según x.                                          ")
+print("  2) Generar un polinomio interpolador por esos 20 pares, según el método de Newton.")
+print("   Testear el grado del polinomio obtenido y graficar marcando los apres de datos.")
+print("  3) Ordenarlos al revés y obtener otro polinomio interpolador. ¿Qué grado tiene?  ")
+print("  ¿Es el mismo? ¿Cómo se hace para saber si el el mismo polinomio? Graficar       ")
+print("  4) Lo mismo desordenando los pares.")
+print("  5) ¿Se puede poner el programa de obtención de raíces como subrutina de este y  ")
+print("  buscar al menos una raíz de uno de los polinomios?   ")
+print("  6) Pueden hacer una subrutina que halle por Lagrange, con el mismo conjunto de pares? ")
+print("  7) Pueden hacer una subrutina que halle por diferencias divididas, con el       ")
+print("  mismo conjunto de pares?                                                        ")
+print("  ¿Qué se puede decir? ¿Qué conclusiones se pueden sacar?                         ")
+
+## I) Theory
+print("                                                                                  ")
+print("**********************************************************************************")
+print("*                                      TEORIA                                    *")
+print("**********************************************************************************")
+print(" Los Métodos de Interpolación son técnicas utilizadas en cálculo para aproximar una")
+print(" función desconocida a partir de un conjunto finito de puntos conocidos           ")
+print("                                                                                  ")
+print("                             ********* NEWTON *********                           ")
+print(" función desconocida a partir de un conjunto finito de puntos conocidos           ")
+print("                                                                                  ")
+# El método de Lagrange se utiliza para encontrar una función que 
 # pase por un conjunto de puntos conocidos de una manera suave y continua.
 # Para encontrar esta función, se utiliza una función polinómica que pasa por 
 # cada uno de los puntos conocidos. La fórmula de interpolación de Lagrange se 
@@ -214,22 +258,37 @@ for x_i in x_eval:
 # como:
 #Li(x)=∏j=0,j≠inx−xjxi−xj
 
-#La ventaja del método de Lagrange es que es fácil de entender y aplicar. Sin embargo,
-# su principal limitación es que no es eficiente para grandes conjuntos de datos.
-
 #Por otro lado, el método de Newton utiliza un polinomio interpolante que se escribe
 # como una suma de términos que involucran las diferencias divididas de los puntos 
 # conocidos. El polinomio interpolante de Newton se puede escribir como:
 #Pn(x)=f[x0]+f[x0,x1](x−x0)+f[x0,x1,x2](x−x0)(x−x1)+⋯+f[x0,x1,…,xn](x−x0)(x−x1)⋯(x−xn−1)
-
 #Donde f[x0,x1,…,xn] es la diferencia dividida de orden n y f[xi] es la función 
-# evaluada en el punto xi [3].
+# evaluada en el punto xi .
 
+
+## II) Examples
+print("                                                                                  ")
+print("**********************************************************************************")
+print("*                                    EJEMPLOS                                    *")
+print("**********************************************************************************")
+print("                                                                                  ") 
+
+
+
+## IV) Conclusions
+print("                                                                                  ")
+print("**********************************************************************************")
+print("*                                  CONCLUSIONES                                  *")
+print("**********************************************************************************")
+#El método de Lagrange utiliza una fórmula de interpolación que se basa en las 
+# ordenadas de una función y no en las diferencias divididas como lo hace el método
+# de Newton .
+#La ventaja del método de Lagrange es que es fácil de entender y aplicar. Sin embargo,
+# su principal limitación es que no es eficiente para grandes conjuntos de datos.
 #La ventaja del método de Newton es que es más eficiente que el método de Lagrange 
 # para grandes conjuntos de datos. Además, el método de Newton se puede utilizar 
 # para la interpolación y extrapolación de datos, mientras que el método de Lagrange 
-# solo se utiliza para la interpolación [3].
-
+# solo se utiliza para la interpolación .
 #Ambos métodos generalizan la propiedad euclidiana de que por dos puntos distintos
 # pasa siempre una (única) recta, ya que permiten encontrar una función polinómica 
 # que pase por un conjunto de puntos conocidos de una manera suave y continua. Sin 
@@ -244,3 +303,4 @@ for x_i in x_eval:
 # métodos permiten encontrar una función polinómica que pase por un conjunto de puntos
 # conocidos de una manera suave y continua, generalizando la propiedad euclidiana de
 # que por dos puntos distintos pasa siempre una (única) recta.
+print("                                                                                  ") 
