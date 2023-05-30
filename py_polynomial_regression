@@ -20,24 +20,27 @@ def my_divided_diff_poly(pares):
     # Toma la primer fila de la matriz de coeficientes de diferencias divididas
     primer_fila = coef[0, :]
     
+    # Redondea los valores de la primer_fila a 2 decimales
+    rounded_fila = np.round_(primer_fila, decimals=2)
+    
     # agrega los valores guardados y genera un polinomio en base a la cantidad de coeficientes
-    newton_poly_str = np.poly1d(primer_fila[::-1])
+    newton_poly_str = np.poly1d(rounded_fila[::-1])
     
     # Imprime el paso a paso por cada valor del dataset
     print("Los polinomios por cada par ordenado son:")
     for i in range(n):
-        # Print the polynomial expression for each pair of values
         row_str = ""
         for j in range(i+1):
             if j == 0:
+                # Diferencia el primer valor de la lista
                 row_str += f"{coef[i,j]:+.2f}"
             else:
+                # Para los demas valores utiliza esto
                 row_str += f"{coef[i,j]:+.2f}(x - {pares[j-1][0]})"
         print(row_str)
     
-    print("El polinomio obtenido es:")
+    print("El polinomio por Diferencias Divididad obtenido es:")
     print(newton_poly_str)
-
 
 def my_divided_diff(pares):
     # Mide la longitud del data set
@@ -66,29 +69,52 @@ def my_divided_diff(pares):
     return coef
 
 # LAGRANGE
-def my_lagrange(pares, x_new):
-    #Where x_values are the values from dataset X
-    # y_values are the values from dataset Y
-    # x_new are the new values
-    
+def my_lagrange_poly(pares):
     # Se separan los pares en dataset de Y y de X
     x, y = separador_pares_x_y(pares)
     
-    # Se inicializa un array vacio de los coeficientes
-    coefs = []
+    # Se calcula el grado del polinomio como <= a n
+    degree = len(x) - 1
     
-    if len(x) != len(y):
-        raise ValueError("x e y deben tener la misma longitud")
-    result = 0
+    # Toma un índice (i) para pasarlo por el producto que calcula el polinomio base para ese índice
+    def calculo_base(i):
+        def calculo_producto(j):
+            if i == j:
+                return 1
+            else:
+                return (x[i] - x[j]) / (x[i] - x[j])
+
+        return calculo_producto
     
-    for i, x_i in enumerate(x):
-        # Calcula el polinomio Lagrange para cada valor
-        l_i = np.prod([(x_new - x[j])/(x_i - x[j]) for j in range(len(x)) if j != i])
-        # Guarda los valores obtenidos, en el array
-        coefs.append(l_i)
-        # Hace la sumatoria de todos los polinomios por dataset
-        result += l_i * y[i]
-    return result
+    # Inicializa un array vacío de coeficientes
+    coeffs = []
+    # Construye los coeficientes del polinomio
+    for i in range(degree + 1):
+        coeff = y[i]
+        for j in range(degree + 1):
+            if i != j:
+                coeff *= np.poly1d([1, -x[j]]) / (x[i] - x[j])
+        coeffs.append(coeff)
+
+    # convierte a array unidimensional como numpy array
+    coeffs = np.array(coeffs).flatten()
+    
+    # Verifica si la forma es adecuada y sino la convierte
+    if coeffs.shape != (degree + 1,):
+        coeffs = coeffs.reshape((degree + 1,))
+    
+    # Devuelve en formato legible como polinomio
+    poly = np.poly1d(coeffs)
+    
+    print("El polinomio por Lrgrange obtenido es:")
+    print(poly)     
+
+
+
+# NEWTON
+
+
+
 
 # Generators
 def generador_pares(cota_minima, cota_maxima):
@@ -118,46 +144,6 @@ def aleator_pares(pares):
     randomness = pares
     return random.shuffle(randomness)
    
-  
-# Function to find the product term 
-def proterm(i, value, x): 
-    pro = 1; 
-    for j in range(i): 
-        pro = pro * (value - x[j]); 
-    return pro; 
-  
-# Function for calculating 
-# divided difference table 
-def dividedDiffTable(x, y, n):
-  
-    for i in range(1, n): 
-        for j in range(n - i): 
-            y[j][i] = ((y[j][i - 1] - y[j + 1][i - 1]) /
-                                     (x[j] - x[i + j]));
-    return y;
-  
-# Function for applying Newton's 
-# divided difference formula 
-def applyFormula(value, x, y, n): 
-  
-    sum = y[0][0]; 
-  
-    for i in range(1, n):
-        sum = sum + (proterm(i, value, x) * y[0][i]); 
-      
-    return sum; 
-  
-# Function for displaying divided 
-# difference table 
-def printDiffTable(y, n): 
-  
-    for i in range(n): 
-        for j in range(n - i): 
-            print(round(y[i][j], 4), "\t", 
-                               end = " ") 
-  
-        print(""); 
-
 # Plots
 def plot_interpolation(x, y, y_fit, n):
     plt.plot(x, y, 'o', label='data')
@@ -165,104 +151,12 @@ def plot_interpolation(x, y, y_fit, n):
     plt.legend()
     plt.show()
 
-
-
-
-
 def graph_details():
     plt.xlabel('x')
     plt.ylabel('y')
     plt.grid(True)
     plt.legend()
     plt.show()
-    
-    
-
-
-def linear_lagrange(a,x):
-    y = a[1]*(x - a[2])/(a[0] - a[2]) + a[3]*(x - a[0])/(a[2] - a[0])
-    plt.plot(x,y,color='blue',label='Linear Lagrange')
-    graph_details()
-    return y
-
-def quadratic_lagrange(a,x):
-    t = a[1]*(x-a[2])*(x-a[4])
-    s = (a[0]-a[2])*(a[0]-a[4])
-    j = t/s
-    m = a[5]*(x-a[0])*(x-a[2])
-    n = (a[4]-a[0])*(a[4]-a[2])
-    i = m/n
-    k = a[3]*(x-a[4])*(x-a[0])
-    y = (a[2]-a[4])*(a[2]-a[0])
-    l = k/y
-    y = j + l + i
-    plt.plot(x,y,color='blue',label='Quadratic Lagrange')
-    graph_details()
-    return y
-
-def cubic_lagrange(a,x):
-    t = a[1]*(x-a[2])*(x-a[4])*(x-a[6])
-    s = (a[0]-a[2])*(a[0]-a[4])*(a[0]-a[6])
-    j = t/s
-    k = a[3]*(x-a[4])*(x-a[0])*(x-a[6])
-    y = (a[2]-a[4])*(a[2]-a[0])*(a[2]-a[6])
-    l = k/y
-    m = a[5]*(x-a[0])*(x-a[2])*(x-a[6])
-    n = (a[4]-a[0])*(a[4]-a[2])*(a[4]-a[6])
-    i = m/n
-    v = a[7]*(x-a[0])*(x-a[2])*(x-a[4])
-    w = (a[6]-a[0])*(a[6]-a[2])*(a[6]-a[4])
-    u = v/w
-    y = j + l + i + u
-    plt.plot(x,y,color='blue',label='Cubic Lagrange')
-    graph_details()
-    return y 
-
-
-
-def zero_newton(a,x):
-    return a[1]
-
-def one_newton(a,x,f):
-    y = zero_newton(a,x) + ((x-a[0])*(a[1]-a[3])/(a[0]-a[2]))
-    if(f==1):
-        plt.plot(x,y,color = 'blue',label='First Order Newton Divided Difference')
-        plt.legend()
-        plt.grid(True)
-        plt.show()
-    return y
-
-def func_one(x1,x2,y1,y2):
-    return (y2 - y1) / (x2 - x1)
-
-def two_newton(a,x,f):
-    j = a[4] - a[0]
-    i = func_one(a[2],a[4],a[3],a[5])
-    k = func_one(a[0],a[2],a[1],a[3])
-    j = (i - k) / j
-    y = one_newton(a,x,0) + ((x-a[0])*(x-a[2])*j)
-    if(f==1):
-        plt.plot(x,y,color = 'blue',label='Second Order Newton Divided Difference')
-        plt.legend()
-        plt.grid(True)
-        plt.show()
-    return y 
-
-def func_two(x1,x2,x3,y1,y2,y3):
-    a = func_one(x1,x2,y1,y2)
-    b = func_one(x2,x3,y2,y3)
-    return (b - a) / (x3 - x1)
-
-def three_newton(a,x):
-    j = a[6] - a[0]
-    k = func_two(a[2],a[4],a[6],a[3],a[5],a[7]) - func_two(a[0],a[2],a[4],a[1],a[3],a[5])
-    y = two_newton(a,x,0) + ((x-a[0])*(x-a[2])*(x-a[4])*k/j)
-    plt.plot(x,y,color = 'blue',label='Third Order Newton Divided Difference')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-    return y
-     
 
 def graph():
     plt.ylabel('Error')
@@ -333,7 +227,7 @@ print(" Donde ym+1 es el valor correspondiente al par de xm+1, y Pm(xm+1) es el 
 print(" anterior evaluado en el x del set actual: xm+1                                   ")
 print(" La cantidad de datos (n) condiciona el grado del polinomio (P):  gr(P) <= n      ")
 print("                                                                                  ")
-print("                           ********* LAGRANGE *********                          ")
+print("                           ********* LAGRANGE *********                           ")
 print(" El método de Lagrange utiliza un polinomio interpolante que se construye como una")
 print(" suma de polinomios para cada uno de los puntos del set:                          ")
 print(" P(x) = L0(x) y0 + L1(x) y1 + … + Ln(x) yn                                        ")
@@ -371,13 +265,16 @@ pares = generador_pares(1, 10)
 print("Los 20 pares generados aleatoriamente son:                                        ")
 for i in range(len(pares)):
     print(pares[i])
-print(" Se aplica Newton y se obtiene el polinomio:                                      ") 
+print(" Se aplica Newton y se obtiene el polinomio:                                      ")
+print("                                                                                  ")
+print("                           ********* LAGRANGE *********                           ")
+print(" Se aplica Lagrange y se obtiene el polinomio:                                    ")
+my_lagrange_poly(pares)
+print("                                                                                  ")
+print("                     ********* DIFERENCIAS DIVIDIDAS *********                    ")
+print(" Se aplica Diferencias Divididad y se obtiene el polinomio:                       ") 
 my_divided_diff_poly(pares)
-
-  
-pares_x, pares_y = separador_pares_x_y(pares)
-print(" Los elementos x son: \n", pares_x)
-print("Los elementos y son: \n", pares_y)
+print("                                                                                  ")
 
 inversed = inversor_pares(pares)
 print("Los elementos invertidos son: \n                                                   ")
