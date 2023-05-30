@@ -7,10 +7,40 @@
 import numpy as np
 from scipy.interpolate import lagrange
 import matplotlib.pyplot as plt
+import random
 
 coefs = []
 
 # Funs
+def calcular_polinomio_interpolador(pares):
+    """
+    Calcula el polinomio interpolador de Newton a partir de una lista de pares de números enteros.
+
+    Args:
+        pares: Lista de pares de números enteros en el formato [(x0, y0), (x1, y1), ..., (xn, yn)].
+
+    Returns:
+        coeffs: Lista de coeficientes del polinomio interpolador.
+    """
+    n = len(pares)
+    xs = np.array([p[0] for p in pares])
+    ys = np.array([p[1] for p in pares])
+
+    # Crear la tabla de diferencias divididas con el tamaño del dataset
+    tabla_diferencias = np.zeros((n, n))
+    # Completa la tabla con los valores de y
+    tabla_diferencias[:, 0] = ys
+
+    for j in range(1, n):
+        for i in range(n - j):
+            tabla_diferencias[i][j] = (tabla_diferencias[i + 1][j - 1] - tabla_diferencias[i][j - 1]) / (xs[i + j] - xs[i])
+
+    # Construir el polinomio interpolador
+    coeffs = tabla_diferencias[0, :]
+
+    return coeffs
+
+
 def my_newton_poly(coef, x_data, x):
 # where coef is a matrix of coefficients from my_divided_diff
 # x_data is the array of x values of the dataset
@@ -31,7 +61,25 @@ def my_newton_poly(coef, x_data, x):
        # poly_str = f"{coef[n-k]:+}" + poly_str + f"({x-x_data[n-k]})"
     return p #poly_str
 
-
+def my_divided_diff(x, y):
+    # takes X and Y from the dataset given
+    n = len(y)
+    
+    # creates a matrix, the size of one variable data (datapoints),containing zeros
+    coef = np.zeros([n, n])
+    
+    # sets Y values of dataset to the first column
+    coef[:,0] = y
+    
+    # iterates through the second column 
+    for j in range(1,n):
+        for i in range(n-j):
+            # calculates the jth divided difference coefficient
+            coef[i][j] = \
+           (coef[i+1][j-1] - coef[i][j-1]) / (x[i+j]-x[i])
+           
+    # returns matrix of coefficients        
+    return coef
 
 
 def my_lagrange(x_values, y_values, x_new):
@@ -61,145 +109,17 @@ def separador_pares_x_y(pares):
     for i in range(len(pares)):
         pares_x.append(pares[i][0])
         pares_y.append(pares[i][1])
-    return pares_x, pares_y      
+    return pares_x, pares_y    
 
+def inversor_pares(pares):
+    reversed = pares[::-1]
+    return reversed
+  
+def aleator_pares(pares):   
+    randomness = pares
+    return random.shuffle(randomness)
 
-# Dataset Parables
-x = np.array([0, 1, 2])
-y = np.array([1, 3, -2])
-
-poly = lagrange(x, y)
-print(np.poly1d(poly))
-
-x_eval = [0, 1, 2]
-for x_i in x_eval:
-    print(f"Los valores por Lagrange son x = {x_i}: y = {my_lagrange(x, y, x_i)}")
-    
-# Dataset Linear
-x = np.array([0, 1, 2])
-y = np.array([1, 2, 3])
-
-poly = lagrange(x, y)
-print(np.poly1d(poly))
-
-x_eval = [0, 1, 2]
-for x_i in x_eval:
-    print(f"Los valores por Lagrange son x = {x_i}: y = {my_lagrange(x, y, x_i)}")
-    
-# Dataset gr P = 0
-##Debe ser una escala aritmetica:
-# sucesión de números tales que la
-# diferencia de cualquier par de términos sucesivos de la secuencia es constante
-# Para este caso debe ser monotona constante
-x = np.array([0, 1, 2])
-y = np.array([1, 1, 1])
-
-poly = lagrange(x, y)
-print(np.poly1d(poly))
-
-x_eval = [0, 1, 2]
-for x_i in x_eval:
-    print(f"Los valores por Lagrange son x = {x_i}: y = {my_lagrange(x, y, x_i)}")
-    
-# Dataset gr P = 1
-# Debe ser una escala aritmetica:
-# sucesión de números tales que la
-# diferencia de cualquier par de términos sucesivos de la secuencia es constante
-# Para este caso debe ser monotona creciente o monotona decreciente
-x = np.array([0, 1, 2])
-y = np.array([1, 2, 3])
-
-poly = lagrange(x, y)
-print(np.poly1d(poly))
-
-x_eval = [0, 1, 2]
-for x_i in x_eval:
-    print(f"Los valores por Lagrange son x = {x_i}: y = {my_lagrange(x, y, x_i)}")
-    
-# El maximo gr P corresponde a gr(P+Q) <= máx(gr P, gr Q)
-
-# Dataset Errors
-x = np.array([0, 1, 2])
-y = np.array([1, 2, 3])
-
-poly = lagrange(x, y)
-print(np.poly1d(poly))
-
-x_eval = [0, 1, 2]
-for x_i in x_eval:
-    print(f"Los valores por Lagrange son x = {x_i}: y = {my_lagrange(x, y, x_i)}")
-    
-# Dataset Fine
-x = np.array([0, 1, 2])
-y = np.array([3, 4, 5])
-
-poly = lagrange(x, y)
-print(np.poly1d(poly))
-
-x_eval = [0, 1, 2]
-for x_i in x_eval:
-    print(f"Los valores por Lagrange son x = {x_i}: y = {my_lagrange(x, y, x_i)}")
-
-# Se puede sumar esa constante al polinomio
-
-# Dataset Errors
-x = np.array([0, 1, 2])
-y = np.array([1, 2, 3])
-
-poly = lagrange(x, y)
-print(np.poly1d(poly))
-
-x_eval = [0, 1, 2]
-for x_i in x_eval:
-    print(f"Los valores por Lagrange son x = {x_i}: y = {my_lagrange(x, y, x_i)}")
-    
-# Dataset Fine
-x = np.array([3, 4, 5])
-y = np.array([1, 2, 3])
-
-poly = lagrange(x, y)
-print(np.poly1d(poly))
-
-x_eval = [0, 1, 2]
-for x_i in x_eval:
-    print(f"Los valores por Lagrange son x = {x_i}: y = {my_lagrange(x, y, x_i)}")
-    
-# Si X set esta corrido positivo, se lo resta al polinomio
-
-# Dataset Fine
-x = np.array([-2, -1, 0])
-y = np.array([1, 2, 3])
-
-poly = lagrange(x, y)
-print(np.poly1d(poly))
-
-x_eval = [0, 1, 2]
-for x_i in x_eval:
-    print(f"Los valores por Lagrange son x = {x_i}: y = {my_lagrange(x, y, x_i)}")
-    
-# Si x set esta corrido a negativo, se lo suma al polinomio
-    
-    
-# Funs
-def my_divided_diff(x, y):
-    # takes X and Y from the dataset given
-    n = len(y)
-    
-    # creates a matrix, the size of one variable data (datapoints),containing zeros
-    coef = np.zeros([n, n])
-    
-    # sets Y values of dataset to the first column
-    coef[:,0] = y
-    
-    # iterates through the second column 
-    for j in range(1,n):
-        for i in range(n-j):
-            # calculates the jth divided difference coefficient
-            coef[i][j] = \
-           (coef[i+1][j-1] - coef[i][j-1]) / (x[i+j]-x[i])
-           
-    # returns matrix of coefficients        
-    return coef
+       
 
 # Newton divided difference formula 
   
@@ -241,56 +161,7 @@ def printDiffTable(y, n):
                                end = " "); 
   
         print(""); 
-  
-# Driver Code
-  
-# number of inputs given 
-n = 4; 
-y = [[0 for i in range(10)] 
-        for j in range(10)]; 
-x = [ 5, 6, 9, 11 ]; 
-  
-# y[][] is used for divided difference 
-# table where y[][0] is used for input 
-y[0][0] = 12; 
-y[1][0] = 13; 
-y[2][0] = 14; 
-y[3][0] = 16; 
-  
-# calculating divided difference table 
-y=dividedDiffTable(x, y, n); 
-  
-# displaying divided difference table 
-printDiffTable(y, n); 
-  
-# value to be interpolated 
-value = 7; 
-  
-# printing the value 
-print("\nValue at", value, "is",
-        round(applyFormula(value, x, y, n), 2))
 
-
-
-
-# Dataset
-x = np.array([0, 1, 2, 3])
-y = np.array([1, 1, 1, 2])
-
-# get the divided difference coef first row
-a_s = my_divided_diff(x, y)[0, :]
-
-# new values stored
-newton_poly_str = np.poly1d(a_s[::-1])
-
-# a) 
-print(newton_poly_str)
-
-x_eval = [0, 1, 2, 3, -1, 2, 4]
-for x_i in x_eval:
-    y_i = my_newton_poly(a_s, x, x_i)
-    print(f"Los valores por Newton son x = {x_i}: y = {y_i}")
-    
 # Plots
 def graph_details():
     plt.xlabel('x')
@@ -416,7 +287,7 @@ print("                                                                         
 print("  1) Primero establecer cotas para los mismos, generar 20 pares de números con    ")
 print("  esas cotas. Ordenar los pares según x.                                          ")
 print("  2) Generar un polinomio interpolador por esos 20 pares, según el método de Newton.")
-print("   Testear el grado del polinomio obtenido y graficar marcando los apres de datos.")
+print("   Testear el grado del polinomio obtenido y graficar marcando los pares de datos.")
 print("  3) Ordenarlos al revés y obtener otro polinomio interpolador. ¿Qué grado tiene?  ")
 print("  ¿Es el mismo? ¿Cómo se hace para saber si el el mismo polinomio? Graficar       ")
 print("  4) Lo mismo desordenando los pares.")
@@ -488,13 +359,25 @@ print("*************************************************************************
 print("                                                                                  ") 
 
 # Llamamos a la funcion para generar los 20 pares aleatorios e imprimimos en pantalla
-pares_aleatorios = generador_pares(0, 10)
+pares = generador_pares(0, 10)
 print("Los 20 pares generados aleatoriamente son: ")
-for i in range(len(pares_aleatorios)):
-    print(pares_aleatorios[i])
-pares_x, pares_y = separador_pares_x_y(pares_aleatorios)
+for i in range(len(pares)):
+    print(pares[i])
+    
+pares_x, pares_y = separador_pares_x_y(pares)
 print(" Los elementos x son: \n", pares_x)
 print("Los elementos y son: \n", pares_y)
+
+inversed = inversor_pares(pares)
+print("Los elementos invertidos son: \n")
+for i in range(len(inversed)):
+    print(inversed[i])
+
+randomness = pares
+random.shuffle(randomness)
+print("Los elementos aleatorizados son: \n")
+for i in range(len(randomness)):
+    print(randomness[i])
 
 ## IV) Conclusions
 print("                                                                                  ")
