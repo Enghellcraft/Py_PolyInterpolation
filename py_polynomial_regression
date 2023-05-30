@@ -6,6 +6,7 @@
 
 import numpy as np
 from scipy.interpolate import lagrange
+import matplotlib.pyplot as plt
 
 coefs = []
 
@@ -289,6 +290,106 @@ x_eval = [0, 1, 2, 3, -1, 2, 4]
 for x_i in x_eval:
     y_i = my_newton_poly(a_s, x, x_i)
     print(f"Los valores por Newton son x = {x_i}: y = {y_i}")
+    
+# Plots
+def graph_details():
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+
+def linear_lagrange(a,x):
+    y = a[1]*(x - a[2])/(a[0] - a[2]) + a[3]*(x - a[0])/(a[2] - a[0])
+    plt.plot(x,y,color='blue',label='Linear Lagrange')
+    graph_details()
+    return y
+
+def quadratic_lagrange(a,x):
+    t = a[1]*(x-a[2])*(x-a[4])
+    s = (a[0]-a[2])*(a[0]-a[4])
+    j = t/s
+    m = a[5]*(x-a[0])*(x-a[2])
+    n = (a[4]-a[0])*(a[4]-a[2])
+    i = m/n
+    k = a[3]*(x-a[4])*(x-a[0])
+    y = (a[2]-a[4])*(a[2]-a[0])
+    l = k/y
+    y = j + l + i
+    plt.plot(x,y,color='blue',label='Quadratic Lagrange')
+    graph_details()
+    return y
+
+def cubic_lagrange(a,x):
+    t = a[1]*(x-a[2])*(x-a[4])*(x-a[6])
+    s = (a[0]-a[2])*(a[0]-a[4])*(a[0]-a[6])
+    j = t/s
+    k = a[3]*(x-a[4])*(x-a[0])*(x-a[6])
+    y = (a[2]-a[4])*(a[2]-a[0])*(a[2]-a[6])
+    l = k/y
+    m = a[5]*(x-a[0])*(x-a[2])*(x-a[6])
+    n = (a[4]-a[0])*(a[4]-a[2])*(a[4]-a[6])
+    i = m/n
+    v = a[7]*(x-a[0])*(x-a[2])*(x-a[4])
+    w = (a[6]-a[0])*(a[6]-a[2])*(a[6]-a[4])
+    u = v/w
+    y = j + l + i + u
+    plt.plot(x,y,color='blue',label='Cubic Lagrange')
+    graph_details()
+    return y 
+
+
+
+def zero_newton(a,x):
+    return a[1]
+
+def one_newton(a,x,f):
+    y = zero_newton(a,x) + ((x-a[0])*(a[1]-a[3])/(a[0]-a[2]))
+    if(f==1):
+        plt.plot(x,y,color = 'blue',label='First Order Newton Divided Difference')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+    return y
+
+def func_one(x1,x2,y1,y2):
+    return (y2 - y1) / (x2 - x1)
+
+def two_newton(a,x,f):
+    j = a[4] - a[0]
+    i = func_one(a[2],a[4],a[3],a[5])
+    k = func_one(a[0],a[2],a[1],a[3])
+    j = (i - k) / j
+    y = one_newton(a,x,0) + ((x-a[0])*(x-a[2])*j)
+    if(f==1):
+        plt.plot(x,y,color = 'blue',label='Second Order Newton Divided Difference')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+    return y 
+
+def func_two(x1,x2,x3,y1,y2,y3):
+    a = func_one(x1,x2,y1,y2)
+    b = func_one(x2,x3,y2,y3)
+    return (b - a) / (x3 - x1)
+
+def three_newton(a,x):
+    j = a[6] - a[0]
+    k = func_two(a[2],a[4],a[6],a[3],a[5],a[7]) - func_two(a[0],a[2],a[4],a[1],a[3],a[5])
+    y = two_newton(a,x,0) + ((x-a[0])*(x-a[2])*(x-a[4])*k/j)
+    plt.plot(x,y,color = 'blue',label='Third Order Newton Divided Difference')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+    return y
+     
+
+def graph():
+    plt.ylabel('Error')
+    plt.xlabel('x')
+    plt.grid(True)
+    plt.show()
+     
 
 
 # Prints
