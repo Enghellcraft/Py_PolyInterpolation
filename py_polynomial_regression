@@ -4,111 +4,110 @@
 #          • Martin, Denise
 #          • Nava, Alejandro
 
+# Imports
 import numpy as np
 from scipy.interpolate import lagrange
 import matplotlib.pyplot as plt
 import random
 
-coefs = []
-
 # Funs
-def calcular_polinomio_interpolador(pares):
-    """
-    Calcula el polinomio interpolador de Newton a partir de una lista de pares de números enteros.
+# DIFERENCIAS DIVIDIDAS
+def my_divided_diff_poly(pares):
+    # Coef es la matriz de datos de my_divided_diff (por diferencias divididas)
+    coef = my_divided_diff(pares)
+    n = len(pares)  
+    
+    # Toma la primer fila de la matriz de coeficientes de diferencias divididas
+    primer_fila = coef[0, :]
+    
+    # agrega los valores guardados y genera un polinomio en base a la cantidad de coeficientes
+    newton_poly_str = np.poly1d(primer_fila[::-1])
+    
+    # Imprime el paso a paso por cada valor del dataset
+    print("Los polinomios por cada par ordenado son:")
+    for i in range(n):
+        # Print the polynomial expression for each pair of values
+        row_str = ""
+        for j in range(i+1):
+            if j == 0:
+                row_str += f"{coef[i,j]:+.2f}"
+            else:
+                row_str += f"{coef[i,j]:+.2f}(x - {pares[j-1][0]})"
+        print(row_str)
+    
+    print("El polinomio obtenido es:")
+    print(newton_poly_str)
 
-    Args:
-        pares: Lista de pares de números enteros en el formato [(x0, y0), (x1, y1), ..., (xn, yn)].
 
-    Returns:
-        coeffs: Lista de coeficientes del polinomio interpolador.
-    """
+def my_divided_diff(pares):
+    # Mide la longitud del data set
     n = len(pares)
-    xs = np.array([p[0] for p in pares])
-    ys = np.array([p[1] for p in pares])
-
-    # Crear la tabla de diferencias divididas con el tamaño del dataset
-    tabla_diferencias = np.zeros((n, n))
-    # Completa la tabla con los valores de y
-    tabla_diferencias[:, 0] = ys
-
-    for j in range(1, n):
-        for i in range(n - j):
-            tabla_diferencias[i][j] = (tabla_diferencias[i + 1][j - 1] - tabla_diferencias[i][j - 1]) / (xs[i + j] - xs[i])
-
-    # Construir el polinomio interpolador
-    coeffs = tabla_diferencias[0, :]
-
-    return coeffs
-
-
-def my_newton_poly(coef, x_data, x):
-# where coef is a matrix of coefficients from my_divided_diff
-# x_data is the array of x values of the dataset
-# x is the array of new X values to witch the Newton poly will evaluate
-
-    n = len(x_data) - 1 
+    # Se separan los pares en dataset de Y y de X
+    x, y = separador_pares_x_y(pares)
     
-    # initialized in the last coefficient of the matrix
-    p = coef[n]
-    #poly_str = str(p)
-    
-    # iterates reversely through the matrix
-    for k in range(1,n+1):
-        # for each coefficient, updates p
-        p = coef[n-k] + (x -x_data[n-k])*p
-        
-        # returns polynomial
-       # poly_str = f"{coef[n-k]:+}" + poly_str + f"({x-x_data[n-k]})"
-    return p #poly_str
-
-def my_divided_diff(x, y):
-    # takes X and Y from the dataset given
-    n = len(y)
-    
-    # creates a matrix, the size of one variable data (datapoints),containing zeros
+    # Crea una matriz del tamaño del dataset y la llena con ceros
     coef = np.zeros([n, n])
     
-    # sets Y values of dataset to the first column
+    # Establece los valores de Y del set en la primer columna
     coef[:,0] = y
     
-    # iterates through the second column 
+    # Itera por la segunda columna
     for j in range(1,n):
         for i in range(n-j):
-            # calculates the jth divided difference coefficient
-            coef[i][j] = \
-           (coef[i+1][j-1] - coef[i][j-1]) / (x[i+j]-x[i])
+            # Calcula el Coeficiente de la J.tesimaca diferencia dividida
+            if x[i+j] == x[i]:
+                # Verifica si son iguales los valores para prevenir la division por cero
+                # establece ese coeficiente a cero
+                coef[i][j] = 0
+            else:
+                coef[i][j] = (coef[i+1][j-1] - coef[i][j-1]) / (x[i+j]-x[i])
            
-    # returns matrix of coefficients        
+    # Devuelve la Matriz de Coeficientes        
     return coef
 
-
-def my_lagrange(x_values, y_values, x_new):
+# LAGRANGE
+def my_lagrange(pares, x_new):
     #Where x_values are the values from dataset X
     # y_values are the values from dataset Y
     # x_new are the new values
     
-    if len(x_values) != len(y_values):
-        raise ValueError("x_values e y_values deben tener la misma")
+    # Se separan los pares en dataset de Y y de X
+    x, y = separador_pares_x_y(pares)
+    
+    # Se inicializa un array vacio de los coeficientes
+    coefs = []
+    
+    if len(x) != len(y):
+        raise ValueError("x e y deben tener la misma longitud")
     result = 0
-    for i, x_i in enumerate(x_values):
-        l_i = np.prod([(x_new - x_values[j])/(x_i - x_values[j]) for j in range(len(x_values)) if j != i])
+    
+    for i, x_i in enumerate(x):
+        # Calcula el polinomio Lagrange para cada valor
+        l_i = np.prod([(x_new - x[j])/(x_i - x[j]) for j in range(len(x)) if j != i])
+        # Guarda los valores obtenidos, en el array
         coefs.append(l_i)
-        result += l_i * y_values[i]
+        # Hace la sumatoria de todos los polinomios por dataset
+        result += l_i * y[i]
     return result
 
-# Funcion generadora de 20 pares de numeros enteros aleatorios
-# ordenados de manera ascendente 
+# Generators
 def generador_pares(cota_minima, cota_maxima):
+    # Genera 20 pares de numeros enteros aleatorios según una cota mínima y máxima
     pares = np.random.randint(cota_minima, cota_maxima, size=(20, 2))
+    # Ordena los pares de forma ascendente
     return sorted(pares, key=lambda x: x[0])
 
 def separador_pares_x_y(pares):
     print()
+    # Establece dos listas vacias para llenar con los valores de y y x
     pares_x = []
     pares_y = []
+    # Agrega en cada una los valores
     for i in range(len(pares)):
         pares_x.append(pares[i][0])
         pares_y.append(pares[i][1])
+    pares_x = np.array(pares_x)
+    pares_y = np.array(pares_y)
     return pares_x, pares_y    
 
 def inversor_pares(pares):
@@ -118,10 +117,7 @@ def inversor_pares(pares):
 def aleator_pares(pares):   
     randomness = pares
     return random.shuffle(randomness)
-
-       
-
-# Newton divided difference formula 
+   
   
 # Function to find the product term 
 def proterm(i, value, x): 
@@ -158,17 +154,30 @@ def printDiffTable(y, n):
     for i in range(n): 
         for j in range(n - i): 
             print(round(y[i][j], 4), "\t", 
-                               end = " "); 
+                               end = " ") 
   
         print(""); 
 
 # Plots
+def plot_interpolation(x, y, y_fit, n):
+    plt.plot(x, y, 'o', label='data')
+    plt.plot(x, y_fit, label='fit')
+    plt.legend()
+    plt.show()
+
+
+
+
+
 def graph_details():
     plt.xlabel('x')
     plt.ylabel('y')
     plt.grid(True)
     plt.legend()
     plt.show()
+    
+    
+
 
 def linear_lagrange(a,x):
     y = a[1]*(x - a[2])/(a[0] - a[2]) + a[3]*(x - a[0])/(a[2] - a[0])
@@ -355,27 +364,29 @@ print("                                                                         
 print("**********************************************************************************")
 print("*                                    EJEMPLOS                                    *")
 print("**********************************************************************************")
-
 print("                                                                                  ") 
-
-# Llamamos a la funcion para generar los 20 pares aleatorios e imprimimos en pantalla
-pares = generador_pares(0, 10)
-print("Los 20 pares generados aleatoriamente son: ")
+print("                             ********* NEWTON *********                           ")
+print(" Se generan los 20 pares de numeros aleatorios enteros.                           ")
+pares = generador_pares(1, 10)
+print("Los 20 pares generados aleatoriamente son:                                        ")
 for i in range(len(pares)):
     print(pares[i])
-    
+print(" Se aplica Newton y se obtiene el polinomio:                                      ") 
+my_divided_diff_poly(pares)
+
+  
 pares_x, pares_y = separador_pares_x_y(pares)
 print(" Los elementos x son: \n", pares_x)
 print("Los elementos y son: \n", pares_y)
 
 inversed = inversor_pares(pares)
-print("Los elementos invertidos son: \n")
+print("Los elementos invertidos son: \n                                                   ")
 for i in range(len(inversed)):
     print(inversed[i])
 
 randomness = pares
 random.shuffle(randomness)
-print("Los elementos aleatorizados son: \n")
+print("Los elementos aleatorizados son: \n                                               ")
 for i in range(len(randomness)):
     print(randomness[i])
 
@@ -390,6 +401,9 @@ print("   ordenadas y absisas para su desarrollo.                               
 print("                                                                                  ")
 print(" • El método de Lagrange solo se utiliza para la interpolación, mientras que el de")
 print("   Newton y Diferencias Divididas se pueden utilizar para interpolación y extrapolación.") 
+print("                                                                                  ")
+print(" • La ventaja del método de Newton es que es idea para datos en gran escala.       ")
+print("   Sin embargo, requiere calcular un nuevo polinomio con cada par ingresado.     ")                                     
 print("                                                                                  ")
 print(" • La ventaja del método de Lagrange es que es fácil de entender y aplicar.       ")
 print("   Sin embargo, no es eficiente para grandes conjuntos de datos (limitación).     ")                                     
