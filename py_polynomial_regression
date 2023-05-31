@@ -10,9 +10,47 @@ from scipy.interpolate import lagrange
 import sympy as sym
 from sympy import simplify
 import random
+from fractions import Fraction
 import matplotlib.pyplot as plt
 
 # Funs
+# ------------------------------------------------------------------------------------------------------------
+# NEWTON
+
+
+# ------------------------------------------------------------------------------------------------------------
+# LAGRANGE
+def my_lagrange_poly(pares):
+    # Se separan los pares en dataset de Y y de X
+    xi, yi = separador_pares_x_y(pares)
+    
+    # Se calcula el grado del polinomio como <= a n
+    n = len(xi)
+    
+    x = sym.Symbol('x')
+    
+    poly = 0
+  
+    def g(i):			
+        tot_mul = 1
+        for j in range(n):
+            # Son todos los valores de las ordenadas menos el que se evalúa en ese instante
+            if i != j:
+                # Calcula el producto del cociente entre los valores de x - cada x[i] y la diferencia de ese x[i] - los x[j]
+                tot_mul *= (x - xi[j]) / (xi[i] - xi[j])
+            
+        return tot_mul
+    
+    for i in range(n):
+        # Sumatoria de cada polinomio por Xi, dando por resultados el polinomio por Lagrange
+        poly += yi[i] * g(i)
+
+    poly = (sym.simplify(poly))
+    
+    print("El polinomio por Lagrange obtenido es:")
+    print(poly)     
+
+# ------------------------------------------------------------------------------------------------------------
 # DIFERENCIAS DIVIDIDAS
 def my_divided_diff_poly(pares):
     # Coef es la matriz de datos de my_divided_diff (por diferencias divididas)
@@ -70,49 +108,20 @@ def my_divided_diff(pares):
     # Devuelve la Matriz de Coeficientes        
     return coef
 
-# LAGRANGE
-def my_lagrange_poly(pares):
-    # Se separan los pares en dataset de Y y de X
-    xi, yi = separador_pares_x_y(pares)
-    
-    # Se calcula el grado del polinomio como <= a n
-    n = len(xi)
-    
-    x = sym.Symbol('x')
-    
-    polinomio = 0
-    divisorL = np.zeros(n, dtype = float)
-    
-    for i in range(0,n,1):    
-        # Termino de Lagrange
-        numerador = 1
-        denominador = 1
-        for j  in range(0,n,1):
-            if (j!=i):
-                numerador = numerador*(x-xi[j])
-                denominador = denominador*(xi[i]-xi[j])
-        terminoLi = numerador/denominador
-
-        polinomio = polinomio + terminoLi*yi[i]
-        divisorL[i] = denominador
-    
-    print("El polinomio por Lagrange obtenido es:")
-    print(polinomio)     
-
-
-
-
-# NEWTON
-
-
-
-
+# ------------------------------------------------------------------------------------------------------------
 # Generators
 def generador_pares(cota_minima, cota_maxima):
     # Genera 20 pares de numeros enteros aleatorios según una cota mínima y máxima
-    pares = np.random.randint(cota_minima, cota_maxima, size=(20, 2))
+    rango = np.arange(cota_minima, cota_maxima+1)
+    
+    # Para evitar errores de un mismo valor xi con varios yi, el replace=False hace que no peudan repetirse esos 
+    # numeros aleatorios. En el caso de yi puede repetirse. Cumpliendo con la Inyectividad
+    x_set = np.random.choice(rango, size=20, replace=False)
+    y_set = np.random.choice(rango, size=20, replace=True)
+
     # Ordena los pares de forma ascendente
-    return sorted(pares, key=lambda x: x[0])
+    lista_pares = list(zip(x_set, y_set))
+    return sorted(lista_pares, key=lambda x: x[0])
 
 def separador_pares_x_y(pares):
     print()
@@ -134,7 +143,8 @@ def inversor_pares(pares):
 def aleator_pares(pares):   
     randomness = pares
     return random.shuffle(randomness)
-   
+
+# ------------------------------------------------------------------------------------------------------------   
 # Plots
 def plot_interpolation(x, y, y_fit, n):
     plt.plot(x, y, 'o', label='data')
@@ -155,8 +165,7 @@ def graph():
     plt.grid(True)
     plt.show()
      
-
-
+# ------------------------------------------------------------------------------------------------------------
 # Prints
 ## null) Task + Pres
 print("                                                                                  ")
@@ -252,11 +261,14 @@ print("*************************************************************************
 print("                                                                                  ") 
 print("                             ********* NEWTON *********                           ")
 print(" Se generan los 20 pares de numeros aleatorios enteros.                           ")
-pares = generador_pares(1, 10)
+pares = generador_pares(-10, 10)
 print("Los 20 pares generados aleatoriamente son:                                        ")
 for i in range(len(pares)):
     print(pares[i])
 print(" Se aplica Newton y se obtiene el polinomio:                                      ")
+
+# Aca Guille mete la funcion que imprima sola el polinomio
+
 print("                                                                                  ")
 print("                           ********* LAGRANGE *********                           ")
 print(" Se aplica Lagrange y se obtiene el polinomio:                                    ")
