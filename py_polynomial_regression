@@ -7,8 +7,10 @@
 # Imports
 import numpy as np
 from scipy.interpolate import lagrange
-import matplotlib.pyplot as plt
+import sympy as sym
+from sympy import simplify
 import random
+import matplotlib.pyplot as plt
 
 # Funs
 # DIFERENCIAS DIVIDIDAS
@@ -71,43 +73,32 @@ def my_divided_diff(pares):
 # LAGRANGE
 def my_lagrange_poly(pares):
     # Se separan los pares en dataset de Y y de X
-    x, y = separador_pares_x_y(pares)
+    xi, yi = separador_pares_x_y(pares)
     
     # Se calcula el grado del polinomio como <= a n
-    degree = len(x) - 1
+    n = len(xi)
     
-    # Toma un índice (i) para pasarlo por el producto que calcula el polinomio base para ese índice
-    def calculo_base(i):
-        def calculo_producto(j):
-            if i == j:
-                return 1
-            else:
-                return (x[i] - x[j]) / (x[i] - x[j])
+    x = sym.Symbol('x')
+    
+    polinomio = 0
+    divisorL = np.zeros(n, dtype = float)
+    
+    for i in range(0,n,1):    
+        # Termino de Lagrange
+        numerador = 1
+        denominador = 1
+        for j  in range(0,n,1):
+            if (j!=i):
+                numerador = numerador*(x-xi[j])
+                denominador = denominador*(xi[i]-xi[j])
+        terminoLi = numerador/denominador
 
-        return calculo_producto
+        polinomio = polinomio + terminoLi*yi[i]
+        divisorL[i] = denominador
     
-    # Inicializa un array vacío de coeficientes
-    coeffs = []
-    # Construye los coeficientes del polinomio
-    for i in range(degree + 1):
-        coeff = y[i]
-        for j in range(degree + 1):
-            if i != j:
-                coeff *= np.poly1d([1, -x[j]]) / (x[i] - x[j])
-        coeffs.append(coeff)
+    print("El polinomio por Lagrange obtenido es:")
+    print(polinomio)     
 
-    # convierte a array unidimensional como numpy array
-    coeffs = np.array(coeffs).flatten()
-    
-    # Verifica si la forma es adecuada y sino la convierte
-    if coeffs.shape != (degree + 1,):
-        coeffs = coeffs.reshape((degree + 1,))
-    
-    # Devuelve en formato legible como polinomio
-    poly = np.poly1d(coeffs)
-    
-    print("El polinomio por Lrgrange obtenido es:")
-    print(poly)     
 
 
 
