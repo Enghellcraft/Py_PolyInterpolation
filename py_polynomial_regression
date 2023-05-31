@@ -149,18 +149,25 @@ def aleator_pares(pares):
 
 # ------------------------------------------------------------------------------------------------------------   
 # Plots
-def graph_details(x, y, poly):
-    x_vals = np.linspace(-2, 22, 100)
+def graph_details_lagrange(pares, poly):
+    x, y = separador_pares_x_y(pares)
+    
+    fig, ax = plt.subplots()
+    ax.scatter(x, y)
+    x_range = np.linspace(min(x), max(x), 5)
+    
     f = sym.lambdify(sym.Symbol('x'), poly)
-    y_vals = f(x_vals)
-    # y_vals = poly(x_vals)
-    plt.title("Gráfico de Pares ordenados")
-    plt.xlabel('x')
-    plt.ylabel('y')
+    y_range = f(x_range)
+    
+    ax.plot(x_range, y_range)
+    
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_title('Gráfico de Pares ordenados y Polinomio Lagrange')
+    
     plt.grid(True)
     #plt.legend()
-    plt.scatter(x, y)
-    plt.plot(x_vals, y_vals)
+    plt.gca().set_facecolor('#e9edc9')
     plt.show()
      
 # ------------------------------------------------------------------------------------------------------------
@@ -276,7 +283,7 @@ print("                           ********* LAGRANGE *********                  
 print(" Se aplica Lagrange y se obtiene el polinomio:                                    ")
 poly_L = my_lagrange_poly(pares)
 print (poly_L)
-graph_details(x, y, poly_L)
+graph_details_lagrange(pares, poly_L)
 print("                                                                                  ")
 print("                     ********* DIFERENCIAS DIVIDIDAS *********                    ")
 print(" Se aplica Diferencias Divididad y se obtiene el polinomio:                       ") 
