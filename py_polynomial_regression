@@ -49,8 +49,8 @@ def my_lagrange_poly(pares):
     # poly = sym.cancel(poly)
     # poly = sym.factor(poly)
     
-    # print("El polinomio por Lagrange obtenido es:")
-    # print(poly)    
+    print("El polinomio por Lagrange obtenido es:")
+    print(poly)    
     return poly
 
 # ------------------------------------------------------------------------------------------------------------
@@ -84,6 +84,8 @@ def my_divided_diff_poly(pares):
     
     print("El polinomio por Diferencias Divididad obtenido es:")
     print(newton_poly_str)
+    
+    return newton_poly_str
 
 def my_divided_diff(pares):
     # Mide la longitud del data set
@@ -159,16 +161,38 @@ def graph_details_lagrange(pares, poly):
     f = sym.lambdify(sym.Symbol('x'), poly)
     y_range = f(x_range)
     
-    ax.plot(x_range, y_range)
+    ax.plot(x_range, y_range, color='blue')
     
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_title('Gráfico de Pares ordenados y Polinomio Lagrange')
+    ax.set_title("Gráfico de Pares ordenados y Polinomio Lagrange")
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
     
     plt.grid(True)
     #plt.legend()
     plt.gca().set_facecolor('#e9edc9')
+    
     plt.show()
+    
+def graph_details_div_diff(pares, poly):
+    x, y = separador_pares_x_y(pares)
+
+    plt.scatter(x, y)
+    
+    x_vals = np.linspace(x.min(), x.max(), 2)
+    y_vals = poly(x_vals)
+    
+    plt.plot(x_vals, y_vals, color='red')
+    
+    plt.title("Gráfico de Pares ordenados y Polinomio Diferencias Divididas")
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    
+    plt.grid(True)
+    #plt.legend()
+    plt.gca().set_facecolor('#e9edc9')
+    
+    plt.show()
+    
      
 # ------------------------------------------------------------------------------------------------------------
 # Prints
@@ -280,14 +304,12 @@ print(" Se aplica Newton y se obtiene el polinomio:                             
 
 print("                                                                                  ")
 print("                           ********* LAGRANGE *********                           ")
-print(" Se aplica Lagrange y se obtiene el polinomio:                                    ")
 poly_L = my_lagrange_poly(pares)
-print (poly_L)
 graph_details_lagrange(pares, poly_L)
 print("                                                                                  ")
 print("                     ********* DIFERENCIAS DIVIDIDAS *********                    ")
-print(" Se aplica Diferencias Divididad y se obtiene el polinomio:                       ") 
-my_divided_diff_poly(pares)
+poly_DD = my_divided_diff_poly(pares)
+graph_details_div_diff(pares, poly_DD)
 print("                                                                                  ")
 
 inversed = inversor_pares(pares)
