@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 # Funs
 # ------------------------------------------------------------------------------------------------------------
 # NEWTON
+# TODO
 
 
 # ------------------------------------------------------------------------------------------------------------
@@ -300,7 +301,7 @@ print("                             ********* NEWTON *********                  
 
 print(" Se aplica Newton y se obtiene el polinomio:                                      ")
 
-# Aca Guille mete la funcion que imprima sola el polinomio
+# TODO Aca Guille mete la funcion que imprima sola el polinomio
 
 print("                                                                                  ")
 print("                           ********* LAGRANGE *********                           ")
