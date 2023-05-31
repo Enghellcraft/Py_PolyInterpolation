@@ -8,7 +8,6 @@
 import numpy as np
 from scipy.interpolate import lagrange
 import sympy as sym
-from sympy import simplify
 import random
 from fractions import Fraction
 import matplotlib.pyplot as plt
@@ -17,7 +16,45 @@ import matplotlib.pyplot as plt
 # Funs
 # ------------------------------------------------------------------------------------------------------------
 # NEWTON
-# TODO
+def my_newton_poly(pares_xy):
+    # Se separan los pares en dataset de Y y de X
+    xi, yi = separador_pares_x_y(pares)
+
+    # Se calcula el grado del polinomio como <= a n
+    n = len(xi)
+
+    x = sym.Symbol('x')
+
+    def newton_poly_for_grade(grade):
+        if grade == 0:
+            print(f"P_0(x) = {yi[grade]}")
+            return yi[grade]
+        else:
+            prev_poly = newton_poly_for_grade(grade - 1)
+            c = sym.Symbol('c')
+            partial_xis = xi[0:grade]
+            new_poly = c
+            for xi_value in partial_xis: new_poly = new_poly * (x - xi_value)
+            new_poly = prev_poly + new_poly
+            print(f"\nP_{grade}(x) = {new_poly}")
+            print(f"P_{grade}({xi[grade]}) = {new_poly.subs(x, xi[grade])} - ({yi[grade]}) = {new_poly.subs(x, xi[grade]) - yi[grade]}")
+            solved_c = sym.solve(new_poly.subs(x, xi[grade]) - yi[grade], c)[0]
+            print(f"c = {solved_c}")
+            new_poly = new_poly.subs(c, solved_c)
+            print(f"P_{grade}(x) = {new_poly}")
+
+            return new_poly
+
+    poly = newton_poly_for_grade(n-1)
+
+
+    print("\n\n\nEl polinomio de Newton obtenido es:")
+    print(poly)
+
+    return poly
+
+
+
 
 
 # ------------------------------------------------------------------------------------------------------------
@@ -160,6 +197,27 @@ def aleator_pares(pares):
 
 # ------------------------------------------------------------------------------------------------------------
 # Plots
+def graph_details_newton(pares, poly):
+    x, y = separador_pares_x_y(pares)
+
+    fig, ax = plt.subplots()
+    ax.scatter(x, y)
+    x_range = np.linspace(min(x), max(x), 5)
+
+    f = sym.lambdify(sym.Symbol('x'), poly)
+    y_range = f(x_range)
+
+    ax.plot(x_range, y_range, color='green')
+
+    ax.set_title("Gráfico de Pares ordenados y Polinomio Newton")
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+
+    plt.grid(True)
+    # plt.legend()
+    plt.gca().set_facecolor('#e9edc9')
+
+    plt.show()
 def graph_details_lagrange(pares, poly):
     x, y = separador_pares_x_y(pares)
 
@@ -310,7 +368,8 @@ print("                             ********* NEWTON *********                  
 
 print(" Se aplica Newton y se obtiene el polinomio:                                      ")
 
-# TODO Aca Guille mete la funcion que imprima sola el polinomio
+poly_N = my_newton_poly(pares)
+graph_details_newton(pares, poly_N)
 
 print("                                                                                  ")
 print("                           ********* LAGRANGE *********                           ")
