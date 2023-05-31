@@ -13,6 +13,7 @@ import random
 from fractions import Fraction
 import matplotlib.pyplot as plt
 
+
 # Funs
 # ------------------------------------------------------------------------------------------------------------
 # NEWTON
@@ -24,24 +25,24 @@ import matplotlib.pyplot as plt
 def my_lagrange_poly(pares):
     # Se separan los pares en dataset de Y y de X
     xi, yi = separador_pares_x_y(pares)
-    
+
     # Se calcula el grado del polinomio como <= a n
     n = len(xi)
-    
+
     x = sym.Symbol('x')
-    
+
     poly = 0
-  
-    def g(i):			
+
+    def g(i):
         tot_mul = 1
         for j in range(n):
             # Son todos los valores de las ordenadas menos el que se evalúa en ese instante
             if i != j:
                 # Calcula el producto del cociente entre los valores de x - cada x[i] y la diferencia de ese x[i] - los x[j]
                 tot_mul *= (x - xi[j]) / (xi[i] - xi[j])
-            
+
         return tot_mul
-    
+
     for i in range(n):
         # Sumatoria de cada polinomio por Xi, dando por resultados el polinomio por Lagrange
         poly += yi[i] * g(i)
@@ -49,77 +50,80 @@ def my_lagrange_poly(pares):
     poly = sym.simplify(poly)
     # poly = sym.cancel(poly)
     # poly = sym.factor(poly)
-    
+
     print("El polinomio por Lagrange obtenido es:")
-    print(poly)    
+    print(poly)
     return poly
+
 
 # ------------------------------------------------------------------------------------------------------------
 # DIFERENCIAS DIVIDIDAS
 def my_divided_diff_poly(pares):
     # Coef es la matriz de datos de my_divided_diff (por diferencias divididas)
     coef = my_divided_diff(pares)
-    n = len(pares)  
-    
+    n = len(pares)
+
     # Toma la primer fila de la matriz de coeficientes de diferencias divididas
     primer_fila = coef[0, :]
-    
+
     # Redondea los valores de la primer_fila a 2 decimales
     rounded_fila = np.round_(primer_fila, decimals=2)
-    
+
     # agrega los valores guardados y genera un polinomio en base a la cantidad de coeficientes
     newton_poly_str = np.poly1d(rounded_fila[::-1])
-    
+
     # Imprime el paso a paso por cada valor del dataset
     print("Los polinomios por cada par ordenado son:")
     for i in range(n):
         row_str = ""
-        for j in range(i+1):
+        for j in range(i + 1):
             if j == 0:
                 # Diferencia el primer valor de la lista
-                row_str += f"{coef[i,j]:+.2f}"
+                row_str += f"{coef[i, j]:+.2f}"
             else:
                 # Para los demas valores utiliza esto
-                row_str += f"{coef[i,j]:+.2f}(x - {pares[j-1][0]})"
+                row_str += f"{coef[i, j]:+.2f}(x - {pares[j - 1][0]})"
         print(row_str)
-    
+
     print("El polinomio por Diferencias Divididad obtenido es:")
     print(newton_poly_str)
-    
+
     return newton_poly_str
+
 
 def my_divided_diff(pares):
     # Mide la longitud del data set
     n = len(pares)
     # Se separan los pares en dataset de Y y de X
     x, y = separador_pares_x_y(pares)
-    
+
     # Crea una matriz del tamaño del dataset y la llena con ceros
     coef = np.zeros([n, n])
-    
+
     # Establece los valores de Y del set en la primer columna
-    coef[:,0] = y
-    
+    coef[:, 0] = y
+
     # Itera por la segunda columna
-    for j in range(1,n):
-        for i in range(n-j):
+    for j in range(1, n):
+        for i in range(n - j):
             # Calcula el Coeficiente de la J.tesimaca diferencia dividida
-            if x[i+j] == x[i]:
+            if x[i + j] == x[i]:
                 # Verifica si son iguales los valores para prevenir la division por cero
                 # establece ese coeficiente a cero
                 coef[i][j] = 0
             else:
-                coef[i][j] = (coef[i+1][j-1] - coef[i][j-1]) / (x[i+j]-x[i])
-           
+                coef[i][j] = (coef[i + 1][j - 1] - coef[i][j - 1]) / (x[i + j] - x[i])
+
     # Devuelve la Matriz de Coeficientes        
     return coef
+
 
 # ------------------------------------------------------------------------------------------------------------
 # Generators
 def generador_pares(cota_minima, cota_maxima):
     # Genera 20 pares de numeros enteros aleatorios según una cota mínima y máxima
-    rango = np.arange(cota_minima, cota_maxima+1)
-    
+    rango = np.arange(cota_minima, cota_maxima + 1)
+
     # Para evitar errores de un mismo valor xi con varios yi, el replace=False hace que no peudan repetirse esos 
     # numeros aleatorios. En el caso de yi puede repetirse. Cumpliendo con la Inyectividad
     x_set = np.random.choice(rango, size=20, replace=False)
@@ -128,6 +132,7 @@ def generador_pares(cota_minima, cota_maxima):
     # Ordena los pares de forma ascendente
     lista_pares = list(zip(x_set, y_set))
     return sorted(lista_pares, key=lambda x: x[0])
+
 
 def separador_pares_x_y(pares):
     print()
@@ -140,64 +145,68 @@ def separador_pares_x_y(pares):
         pares_y.append(pares[i][1])
     pares_x = np.array(pares_x)
     pares_y = np.array(pares_y)
-    return pares_x, pares_y    
+    return pares_x, pares_y
+
 
 def inversor_pares(pares):
     reversed = pares[::-1]
     return reversed
-  
-def aleator_pares(pares):   
+
+
+def aleator_pares(pares):
     randomness = pares
     return random.shuffle(randomness)
 
-# ------------------------------------------------------------------------------------------------------------   
+
+# ------------------------------------------------------------------------------------------------------------
 # Plots
 def graph_details_lagrange(pares, poly):
     x, y = separador_pares_x_y(pares)
-    
+
     fig, ax = plt.subplots()
     ax.scatter(x, y)
     x_range = np.linspace(min(x), max(x), 5)
-    
+
     f = sym.lambdify(sym.Symbol('x'), poly)
     y_range = f(x_range)
-    
+
     ax.plot(x_range, y_range, color='blue')
-    
+
     ax.set_title("Gráfico de Pares ordenados y Polinomio Lagrange")
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
-    
+
     plt.grid(True)
-    #plt.legend()
+    # plt.legend()
     plt.gca().set_facecolor('#e9edc9')
-    
+
     plt.show()
-    
+
+
 def graph_details_div_diff(pares, poly):
     x, y = separador_pares_x_y(pares)
 
     plt.scatter(x, y)
-    
+
     x_vals = np.linspace(x.min(), x.max(), 2)
     y_vals = poly(x_vals)
-    
+
     plt.plot(x_vals, y_vals, color='red')
-    
+
     plt.title("Gráfico de Pares ordenados y Polinomio Diferencias Divididas")
     plt.xlabel("X")
     plt.ylabel("Y")
-    
+
     plt.grid(True)
-    #plt.legend()
+    # plt.legend()
     plt.gca().set_facecolor('#e9edc9')
-    
+
     plt.show()
-    
-     
+
+
 # ------------------------------------------------------------------------------------------------------------
 # Prints
-## null) Task + Pres
+#  null) Task + Pres
 print("                                                                                  ")
 print("**********************************************************************************")
 print("*            METODOS NUMERICOS - 2023 - TP METODOs DE INTERPOLACION              *")
@@ -231,7 +240,7 @@ print("  7) Pueden hacer una subrutina que halle por diferencias divididas, con 
 print("  mismo conjunto de pares?                                                        ")
 print("  ¿Qué se puede decir? ¿Qué conclusiones se pueden sacar?                         ")
 
-## I) Theory
+#  I) Theory
 print("                                                                                  ")
 print("**********************************************************************************")
 print("*                                      TEORIA                                    *")
@@ -283,12 +292,12 @@ print(" Donde se toma todo el dataset y se realiza las diferencias divididas de 
 print(" En ambos casos el resultado debería ser igual o similar.                         ")
 print("                                                                                  ")
 
-## II) Examples
+#  II) Examples
 print("                                                                                  ")
 print("**********************************************************************************")
 print("*                                    EJEMPLOS                                    *")
 print("**********************************************************************************")
-print("                                                                                  ") 
+print("                                                                                  ")
 print(" Se generan los 20 pares de numeros aleatorios enteros.                           ")
 pares = generador_pares(0, 20)
 print("Los 20 pares generados aleatoriamente son:                                        ")
@@ -296,7 +305,7 @@ for i in range(len(pares)):
     print(pares[i])
 x, y = separador_pares_x_y(pares)
 
-print("                                                                                  ") 
+print("                                                                                  ")
 print("                             ********* NEWTON *********                           ")
 
 print(" Se aplica Newton y se obtiene el polinomio:                                      ")
@@ -334,20 +343,20 @@ print("   ordenadas de una función en cambio Newton y Diferencias Divididas req
 print("   ordenadas y absisas para su desarrollo.                                        ")
 print("                                                                                  ")
 print(" • El método de Lagrange solo se utiliza para la interpolación, mientras que el de")
-print("   Newton y Diferencias Divididas se pueden utilizar para interpolación y extrapolación.") 
+print("   Newton y Diferencias Divididas se pueden utilizar para interpolación y extrapolación.")
 print("                                                                                  ")
 print(" • La ventaja del método de Newton es que es idea para datos en gran escala.       ")
-print("   Sin embargo, requiere calcular un nuevo polinomio con cada par ingresado.     ")                                     
+print("   Sin embargo, requiere calcular un nuevo polinomio con cada par ingresado.     ")
 print("                                                                                  ")
 print(" • La ventaja del método de Lagrange es que es fácil de entender y aplicar.       ")
-print("   Sin embargo, no es eficiente para grandes conjuntos de datos (limitación).     ")                                     
+print("   Sin embargo, no es eficiente para grandes conjuntos de datos (limitación).     ")
 print("                                                                                  ")
 print(" • La ventaja del método de Diferencias Divididas es que es sencillo y no hay que ")
-print("   recalcular coeficientes. Sin embargo, tiene que tener suficiente presición para") 
-print("   entenderse y no permite cambios muy grandes (por su similitud con derivadas).  ")                                      
+print("   recalcular coeficientes. Sin embargo, tiene que tener suficiente presición para")
+print("   entenderse y no permite cambios muy grandes (por su similitud con derivadas).  ")
 print("                                                                                  ")
 print(" • Los tres métodos permiten encontrar una función polinómica que pase por un     ")
-print("   conjunto de puntos de manera continua, generalizando la propiedad euclidiana de") 
-print("   que por dos puntos distintos pasa siempre una (única) recta.                   ")                                      
+print("   conjunto de puntos de manera continua, generalizando la propiedad euclidiana de")
+print("   que por dos puntos distintos pasa siempre una (única) recta.                   ")
 print("                                                                                  ")
-print("                                                                                  ") 
+print("                                                                                  ")
