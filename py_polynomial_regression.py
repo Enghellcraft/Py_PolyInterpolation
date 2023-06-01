@@ -6,19 +6,17 @@
 
 # Imports
 import numpy as np
-from scipy.interpolate import lagrange
 import sympy as sym
 import random
 from fractions import Fraction
 import matplotlib.pyplot as plt
-
 
 # Funs
 # ------------------------------------------------------------------------------------------------------------
 # NEWTON
 def my_newton_poly(pares_xy):
     # Se separan los pares en dataset de Y y de X
-    xi, yi = separador_pares_x_y(pares)
+    xi, yi = separador_pares_x_y(pares_xy)
 
     # Se calcula el grado del polinomio como <= a n
     n = len(xi)
@@ -27,35 +25,48 @@ def my_newton_poly(pares_xy):
 
     def newton_poly_for_grade(grade):
         if grade == 0:
+            # Para el grado 0, imprime el Y[0] correspondiente
+            print("Los polinomios por cada par ordenado son:")
             print(f"P_0(x) = {yi[grade]}")
             return yi[grade]
         else:
+            # Para grado mayor a cero, crea el polinomio anterior en prev_poly
             prev_poly = newton_poly_for_grade(grade - 1)
+
+            # Establece a c como símbolo para expresarlo en la impresión y luego calcularlo
             c = sym.Symbol('c')
+
+            # Selecciona los valores de xi con el i (grado) correspondiente
             partial_xis = xi[0:grade]
+
+            # Inicializa el nuevo polinomio con la constante c
             new_poly = c
+
+            # Multiplica todos los (x - xi) para cada xi 
             for xi_value in partial_xis: new_poly = new_poly * (x - xi_value)
+
+            # Combina el polinomio anterior con el nuevo polinomio
             new_poly = prev_poly + new_poly
             print(f"\nP_{grade}(x) = {new_poly}")
-            print(f"P_{grade}({xi[grade]}) = {new_poly.subs(x, xi[grade])} - ({yi[grade]}) = {new_poly.subs(x, xi[grade]) - yi[grade]}")
+            # print(f"P_{grade}({xi[grade]}) = {new_poly.subs(x, xi[grade])} - ({yi[grade]}) = {new_poly.subs(x, xi[grade]) - yi[grade]}")
+
+            # Del polinomio anterior evaluado en el actual x[i] y el y[i], se despeja la c
             solved_c = sym.solve(new_poly.subs(x, xi[grade]) - yi[grade], c)[0]
             print(f"c = {solved_c}")
+
+            # se reemplaza la C por el valor obtenido resultando en el polinomio de esa iteración
             new_poly = new_poly.subs(c, solved_c)
             print(f"P_{grade}(x) = {new_poly}")
 
             return new_poly
 
     poly = newton_poly_for_grade(n-1)
+    poly = sym.simplify(poly)
 
-
-    print("\n\n\nEl polinomio de Newton obtenido es:")
+    print("\n\nEl polinomio de Newton obtenido es:")
     print(poly)
 
     return poly
-
-
-
-
 
 # ------------------------------------------------------------------------------------------------------------
 # LAGRANGE
@@ -92,7 +103,6 @@ def my_lagrange_poly(pares):
     print(poly)
     return poly
 
-
 # ------------------------------------------------------------------------------------------------------------
 # DIFERENCIAS DIVIDIDAS
 def my_divided_diff_poly(pares):
@@ -126,7 +136,6 @@ def my_divided_diff_poly(pares):
     print(newton_poly_str)
 
     return newton_poly_str
-
 
 def my_divided_diff(pares):
     # Mide la longitud del data set
@@ -194,9 +203,17 @@ def aleator_pares(pares):
     randomness = pares
     return random.shuffle(randomness)
 
+def generador_de_raices(poly):
+    x = sym.Symbol('x')
+    coeff = sym.Poly(poly, x).all_coeffs()
+    roots = np.roots(coeff)
+    print ("Las Raices del Polinomio son:")
+    for i, root in enumerate(roots):
+        print (f"Raíz {i+1} =  {root:.2f}")
 
 # ------------------------------------------------------------------------------------------------------------
 # Plots
+# NEWTON
 def graph_details_newton(pares, poly):
     x, y = separador_pares_x_y(pares)
 
@@ -218,6 +235,8 @@ def graph_details_newton(pares, poly):
     plt.gca().set_facecolor('#e9edc9')
 
     plt.show()
+
+# LAGRANGE
 def graph_details_lagrange(pares, poly):
     x, y = separador_pares_x_y(pares)
 
@@ -240,14 +259,22 @@ def graph_details_lagrange(pares, poly):
 
     plt.show()
 
-
-def graph_details_div_diff(pares, poly):
+# DIFERENCIAS DIVIDIDAS
+def graph_details_div_diff(pares, poly_str):
+    # Recibe lista de pares y polinomio generado por diferencias divididas en formato String
     x, y = separador_pares_x_y(pares)
 
     plt.scatter(x, y)
 
-    x_vals = np.linspace(x.min(), x.max(), 2)
-    y_vals = poly(x_vals)
+    # Declaro el simbolo como x
+    x = sym.Symbol('x')
+
+    # Conversion de polinomio string a simbolo
+    poly_expr = sym.sympify(poly_str)
+    poly_func = sym.lambdify(x, poly_expr)
+
+    x_vals = np.linspace(x.min(), x.max(), 5)
+    y_vals = poly_func(x_vals)
 
     plt.plot(x_vals, y_vals, color='red')
 
@@ -362,25 +389,27 @@ print("Los 20 pares generados aleatoriamente son:                               
 for i in range(len(pares)):
     print(pares[i])
 x, y = separador_pares_x_y(pares)
-
 print("                                                                                  ")
-print("                             ********* NEWTON *********                           ")
 
-print(" Se aplica Newton y se obtiene el polinomio:                                      ")
+print("                             ********* NEWTON *********                           ")
 
 poly_N = my_newton_poly(pares)
 graph_details_newton(pares, poly_N)
-
+print("                                                                                  ")
+generador_de_raices(poly_N)
 print("                                                                                  ")
 print("                           ********* LAGRANGE *********                           ")
 poly_L = my_lagrange_poly(pares)
 graph_details_lagrange(pares, poly_L)
 print("                                                                                  ")
+generador_de_raices(poly_L)
+print("                                                                                  ")
 print("                     ********* DIFERENCIAS DIVIDIDAS *********                    ")
 poly_DD = my_divided_diff_poly(pares)
 graph_details_div_diff(pares, poly_DD)
 print("                                                                                  ")
-
+generador_de_raices(poly_DD)
+print("                                                                                  ")
 inversed = inversor_pares(pares)
 print("Los elementos invertidos son: \n                                                   ")
 for i in range(len(inversed)):
