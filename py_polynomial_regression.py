@@ -25,7 +25,7 @@ def my_newton_poly(pares_xy):
 
     x = sym.Symbol('x')
 
-    def newton_poly_for_grade(grade):
+    def newton_poly_by_grade(grade):
         if grade == 0:
             # Para el grado 0, imprime el f(0) correspondiente
             print("Los polinomios por cada par ordenado son:")
@@ -33,7 +33,7 @@ def my_newton_poly(pares_xy):
             return yi[grade]
         else:
             # Para grado mayor a cero, crea recursivamente el polinomio anterior en prev_poly
-            prev_poly = newton_poly_for_grade(grade - 1)
+            prev_poly = newton_poly_by_grade(grade - 1)
 
             # Establece a c como símbolo para expresarlo en la impresión y luego calcularlo
             c = sym.Symbol('c')
@@ -64,7 +64,7 @@ def my_newton_poly(pares_xy):
 
             return new_poly
 
-    poly = newton_poly_for_grade(n-1)
+    poly = newton_poly_by_grade(n-1)
     poly = sym.simplify(poly)
 
     print("\n\nEl polinomio de Newton obtenido es:")
@@ -110,17 +110,10 @@ def my_lagrange_poly(pares):
 def my_divided_diff_poly(pares):
     # Coef es la matriz de datos de my_divided_diff (por diferencias divididas)
     coef = my_divided_diff(pares)
+    
+    # Se calcula el grado del polinomio como <= a n
     n = len(pares)
-
-    # Toma la primer fila de la matriz de coeficientes de diferencias divididas
-    primer_fila = coef[0, :]
-
-    # Redondea los valores de la primer_fila a 2 decimales
-    rounded_fila = np.round_(primer_fila, decimals=2)
-
-    # agrega los valores guardados y genera un polinomio en base a la cantidad de coeficientes
-    newton_poly_str = np.poly1d(rounded_fila[::-1])
-
+    
     # Imprime el paso a paso por cada valor del dataset
     print("Los polinomios por cada par ordenado son:")
     for i in range(n):
@@ -135,7 +128,7 @@ def my_divided_diff_poly(pares):
         print(row_str)
 
     print("El polinomio por Diferencias Divididas obtenido es:")
-    print(newton_poly_str)
+    print(my_poly_format(coef))
 
     return coef
 
@@ -156,15 +149,13 @@ def my_divided_diff(pares):
         for i in range(n - j):
             # Calcula el Coeficiente de la J.tesimaca diferencia dividida
             if x[i + j] == x[i]:
-                # Verifica si son iguales los valores para prevenir la division por cero
-                # establece ese coeficiente a cero
+                # Verifica si son iguales los valores para prevenir la division por cero se establece ese coeficiente a cero
                 coef[i][j] = 0
             else:
                 coef[i][j] = (coef[i + 1][j - 1] - coef[i][j - 1]) / (x[i + j] - x[i])
 
     # Devuelve la Matriz de Coeficientes        
     return coef
-
 
 # ------------------------------------------------------------------------------------------------------------
 # Generators
@@ -205,29 +196,43 @@ def aleator_pares(pares):
     randomness = pares
     return random.shuffle(randomness)
 
-#Newton fun
+# Newton fun
 def my_newton(poly, x0):
     # Se establece el error a "e"
     e = 0.001
 
     # Se crea la variable
     x = sym.Symbol('x')
-    poly = poly.subs('x', x)
+    
+    funcion = sympify(poly)
 
     # Se realiza la derivada
-    df=diff(poly,x)
+    df= funcion.diff(x)
+    
+    # Verifica que la derivada primera no sea cero, ya que no aseura su convergencia a una raíz
+    if df == 0:
+        return print("No converge o lo hara con gran error ya que la derivada de la funcion es Cero")
+
+    f_x0 = funcion.subs({x: x0}).evalf()
         
-    if abs((poly.subs(x,x0)).evalf()) < e:
+    if Abs((poly.subs(x,x0)).evalf()) < e:
         return x0
     else:
         return my_newton(poly, x0 - ((poly/df).subs(x,x0).evalf()))    
     
-    """x = sym.Symbol('x')
-    coeff = sym.Poly(poly, x).all_coeffs()
-    roots = np.roots(coeff)
-    print ("Las Raices del Polinomio son:")
-    for i, root in enumerate(roots):
-        print (f"Raíz {i+1} =  {root:.2f}")"""
+        
+# Format Print
+def my_poly_format(coefs):
+    # Toma la primer fila de la matriz de coeficientes
+    primer_fila = coefs[0, :]
+
+    # Redondea los valores de la primer_fila a 2 decimales
+    rounded_fila = np.round_(primer_fila, decimals=2)
+
+    # agrega los valores guardados y genera un polinomio en base a la cantidad de coeficientes
+    nice_poly_str = np.poly1d(rounded_fila[::-1])
+    
+    return nice_poly_str
 
 # ------------------------------------------------------------------------------------------------------------
 # Plots
@@ -278,11 +283,17 @@ def graph_details_lagrange(pares, poly):
     plt.show()
 
 # DIFERENCIAS DIVIDIDAS
-def graph_details_div_diff(pares, poly_str):
+def graph_details_div_diff(pares, poly_coeffs):
     # Recibe lista de pares y polinomio generado por diferencias divididas en formato String
     x, y = separador_pares_x_y(pares)
 
     plt.scatter(x, y)
+    
+    # Se calcula el grado del polinomio como <= a n
+    n = len(pares)
+    
+    
+    p_callable = np.poly1d(np.array(poly_coeffs))
 
     # Declaro el simbolo como x
     # x = sym.Symbol('x')
@@ -292,7 +303,7 @@ def graph_details_div_diff(pares, poly_str):
     # poly_func = sym.lambdify(x, poly_expr)
 
     x_vals = np.linspace(x.min(), x.max(), 5)
-    y_vals = poly_str(x_vals)
+    y_vals = p_callable(x_vals)
 
     plt.plot(x_vals, y_vals, color='red')
 
@@ -402,7 +413,7 @@ print("*                                    EJEMPLOS                            
 print("**********************************************************************************")
 print("                                                                                  ")
 print(" Se generan los 20 pares de numeros aleatorios enteros.                           ")
-pares = generador_pares(0, 20)
+pares = generador_pares(-10, 10)
 print("Los 20 pares generados aleatoriamente son:                                        ")
 for i in range(len(pares)):
     print(pares[i])
@@ -429,7 +440,6 @@ my_newton(poly_L, x0)
 print(f"El Polinomio por Lagrange posee una raiz en: ({root:.1f}, 0)                     ")
 print("                                                                                  ")
 print("                     ********* DIFERENCIAS DIVIDIDAS *********                    ")
-poly_DD = my_divided_diff_poly(pares)
 poly_DD = my_divided_diff(pares)
 graph_details_div_diff(pares, poly_DD)
 print("                                                                                  ")
