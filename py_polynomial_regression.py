@@ -7,9 +7,11 @@
 # Imports
 import numpy as np
 import sympy as sym
+from sympy import *
 import random
 from fractions import Fraction
 import matplotlib.pyplot as plt
+from sympy import diff
 
 # Funs
 # ------------------------------------------------------------------------------------------------------------
@@ -25,36 +27,38 @@ def my_newton_poly(pares_xy):
 
     def newton_poly_for_grade(grade):
         if grade == 0:
-            # Para el grado 0, imprime el Y[0] correspondiente
+            # Para el grado 0, imprime el f(0) correspondiente
             print("Los polinomios por cada par ordenado son:")
             print(f"P_0(x) = {yi[grade]}")
             return yi[grade]
         else:
-            # Para grado mayor a cero, crea el polinomio anterior en prev_poly
+            # Para grado mayor a cero, crea recursivamente el polinomio anterior en prev_poly
             prev_poly = newton_poly_for_grade(grade - 1)
 
             # Establece a c como símbolo para expresarlo en la impresión y luego calcularlo
             c = sym.Symbol('c')
 
-            # Selecciona los valores de xi con el i (grado) correspondiente
+            # Selecciona los valores de xi desde x_0 hasta antes del grado actual: "[0, grade)"
             partial_xis = xi[0:grade]
 
             # Inicializa el nuevo polinomio con la constante c
             new_poly = c
 
-            # Multiplica todos los (x - xi) para cada xi 
+            # Multiplica c por (x - xi) para cada uno de los xi filtrados previamente
             for xi_value in partial_xis: new_poly = new_poly * (x - xi_value)
 
-            # Combina el polinomio anterior con el nuevo polinomio
+            # Suma el nuevo polinomio al polinomio de grado anterior
             new_poly = prev_poly + new_poly
             print(f"\nP_{grade}(x) = {new_poly}")
             # print(f"P_{grade}({xi[grade]}) = {new_poly.subs(x, xi[grade])} - ({yi[grade]}) = {new_poly.subs(x, xi[grade]) - yi[grade]}")
 
-            # Del polinomio anterior evaluado en el actual x[i] y el y[i], se despeja la c
+            # De dicho polinomio, para el par actual (x[i], y[i], donde "P_grado(x) = f(x)"" ) se despeja la c.
+            #       P_grade(x[grade])               = y[grade]
+            #       P_grade(x[grade]) - y[grade]    = 0
             solved_c = sym.solve(new_poly.subs(x, xi[grade]) - yi[grade], c)[0]
             print(f"c = {solved_c}")
 
-            # se reemplaza la C por el valor obtenido resultando en el polinomio de esa iteración
+            # Se reemplaza la C por el valor obtenido resultando en el polinomio de esa iteración
             new_poly = new_poly.subs(c, solved_c)
             print(f"P_{grade}(x) = {new_poly}")
 
@@ -96,8 +100,6 @@ def my_lagrange_poly(pares):
         poly += yi[i] * g(i)
 
     poly = sym.simplify(poly)
-    # poly = sym.cancel(poly)
-    # poly = sym.factor(poly)
 
     print("El polinomio por Lagrange obtenido es:")
     print(poly)
@@ -132,10 +134,10 @@ def my_divided_diff_poly(pares):
                 row_str += f"{coef[i, j]:+.2f}(x - {pares[j - 1][0]})"
         print(row_str)
 
-    print("El polinomio por Diferencias Divididad obtenido es:")
+    print("El polinomio por Diferencias Divididas obtenido es:")
     print(newton_poly_str)
 
-    return newton_poly_str
+    return coef
 
 def my_divided_diff(pares):
     # Mide la longitud del data set
@@ -168,7 +170,7 @@ def my_divided_diff(pares):
 # Generators
 def generador_pares(cota_minima, cota_maxima):
     # Genera 20 pares de numeros enteros aleatorios según una cota mínima y máxima
-    rango = np.arange(cota_minima, cota_maxima + 1)
+    rango = np.arange(cota_minima, cota_maxima)
 
     # Para evitar errores de un mismo valor xi con varios yi, el replace=False hace que no peudan repetirse esos 
     # numeros aleatorios. En el caso de yi puede repetirse. Cumpliendo con la Inyectividad
@@ -203,13 +205,29 @@ def aleator_pares(pares):
     randomness = pares
     return random.shuffle(randomness)
 
-def generador_de_raices(poly):
+#Newton fun
+def my_newton(poly, x0):
+    # Se establece el error a "e"
+    e = 0.001
+
+    # Se crea la variable
     x = sym.Symbol('x')
+    poly = poly.subs('x', x)
+
+    # Se realiza la derivada
+    df=diff(poly,x)
+        
+    if abs((poly.subs(x,x0)).evalf()) < e:
+        return x0
+    else:
+        return my_newton(poly, x0 - ((poly/df).subs(x,x0).evalf()))    
+    
+    """x = sym.Symbol('x')
     coeff = sym.Poly(poly, x).all_coeffs()
     roots = np.roots(coeff)
     print ("Las Raices del Polinomio son:")
     for i, root in enumerate(roots):
-        print (f"Raíz {i+1} =  {root:.2f}")
+        print (f"Raíz {i+1} =  {root:.2f}")"""
 
 # ------------------------------------------------------------------------------------------------------------
 # Plots
@@ -267,14 +285,14 @@ def graph_details_div_diff(pares, poly_str):
     plt.scatter(x, y)
 
     # Declaro el simbolo como x
-    x = sym.Symbol('x')
+    # x = sym.Symbol('x')
 
     # Conversion de polinomio string a simbolo
-    poly_expr = sym.sympify(poly_str)
-    poly_func = sym.lambdify(x, poly_expr)
+    # poly_expr = sym.sympify(poly_str)
+    # poly_func = sym.lambdify(x, poly_expr)
 
     x_vals = np.linspace(x.min(), x.max(), 5)
-    y_vals = poly_func(x_vals)
+    y_vals = poly_str(x_vals)
 
     plt.plot(x_vals, y_vals, color='red')
 
@@ -396,19 +414,30 @@ print("                             ********* NEWTON *********                  
 poly_N = my_newton_poly(pares)
 graph_details_newton(pares, poly_N)
 print("                                                                                  ")
-generador_de_raices(poly_N)
+# Se toma un x0 = 1
+x0 = 1
+root = my_newton(poly_N, x0)
+print(f"El Polinomio por Newton posee una raiz en: ({root:.1f}, 0)                       ")
 print("                                                                                  ")
 print("                           ********* LAGRANGE *********                           ")
 poly_L = my_lagrange_poly(pares)
 graph_details_lagrange(pares, poly_L)
 print("                                                                                  ")
-generador_de_raices(poly_L)
+# Se toma un x0 = 1
+x0 = 1
+my_newton(poly_L, x0)
+print(f"El Polinomio por Lagrange posee una raiz en: ({root:.1f}, 0)                     ")
 print("                                                                                  ")
 print("                     ********* DIFERENCIAS DIVIDIDAS *********                    ")
 poly_DD = my_divided_diff_poly(pares)
+poly_DD = my_divided_diff(pares)
 graph_details_div_diff(pares, poly_DD)
 print("                                                                                  ")
-generador_de_raices(poly_DD)
+# Se toma un x0 = 1
+x0 = 1
+root = my_newton(poly_DD, x0)
+print(f"El Polinomio por Diferencias Divididas posee una raiz en: ({root:.1f}, 0)        ")
+print("                                                                                  ")
 print("                                                                                  ")
 inversed = inversor_pares(pares)
 print("Los elementos invertidos son: \n                                                   ")
