@@ -128,12 +128,13 @@ def my_divided_diff_poly(pares):
         print(row_str)
 
     print("El polinomio por Diferencias Divididas obtenido es:")
-    print(my_poly_format(coef))
+    poly = my_poly_format(coef)
+    print(poly)
 
-    return coef
+    return poly
 
 def my_divided_diff(pares):
-    # Mide la longitud del data set
+    # Mide la longitud del dataset
     n = len(pares)
     # Se separan los pares en dataset de Y y de X
     x, y = separador_pares_x_y(pares)
@@ -141,21 +142,23 @@ def my_divided_diff(pares):
     # Crea una matriz del tamaño del dataset y la llena con ceros
     coef = np.zeros([n, n])
 
-    # Establece los valores de Y del set en la primer columna
+    # Establece los valores de Y del set en la primera columna
     coef[:, 0] = y
 
-    # Itera por la segunda columna
+    # Itera por las columnas restantes
     for j in range(1, n):
         for i in range(n - j):
-            # Calcula el Coeficiente de la J.tesimaca diferencia dividida
+            # Calcula el coeficiente de la j-ésima diferencia dividida
             if x[i + j] == x[i]:
-                # Verifica si son iguales los valores para prevenir la division por cero se establece ese coeficiente a cero
+                # Verifica si los valores son iguales para evitar la división por cero
                 coef[i][j] = 0
             else:
                 coef[i][j] = (coef[i + 1][j - 1] - coef[i][j - 1]) / (x[i + j] - x[i])
 
-    # Devuelve la Matriz de Coeficientes        
+    # Devuelve la matriz de coeficientes
+    # print("Los coeficientes son:\n", coef)
     return coef
+
 
 # ------------------------------------------------------------------------------------------------------------
 # Generators
@@ -165,11 +168,12 @@ def generador_pares(cota_minima, cota_maxima):
 
     # Para evitar errores de un mismo valor xi con varios yi, el replace=False hace que no peudan repetirse esos 
     # numeros aleatorios. En el caso de yi puede repetirse. Cumpliendo con la Inyectividad
-    x_set = np.random.choice(rango, size=20, replace=False)
-    y_set = np.random.choice(rango, size=20, replace=True)
+    x_set = np.random.choice(rango, size=5, replace=False)
+    y_set = np.random.choice(rango, size=5, replace=True)
 
     # Ordena los pares de forma ascendente
     lista_pares = list(zip(x_set, y_set))
+    print(f"Se generaron {len(lista_pares)} pares")
     return sorted(lista_pares, key=lambda x: x[0])
 
 
@@ -292,9 +296,8 @@ def graph_details_div_diff(pares, poly_coeffs):
     # Se calcula el grado del polinomio como <= a n
     n = len(pares)
     
-    
-    p_callable = np.poly1d(np.array(poly_coeffs))
-
+    p_callable = np.poly1d(np.ravel(poly_coeffs))  # Convertir matriz de coeficientes a lista 1D
+    print(p_callable)
     # Declaro el simbolo como x
     # x = sym.Symbol('x')
 
@@ -302,7 +305,7 @@ def graph_details_div_diff(pares, poly_coeffs):
     # poly_expr = sym.sympify(poly_str)
     # poly_func = sym.lambdify(x, poly_expr)
 
-    x_vals = np.linspace(x.min(), x.max(), 5)
+    x_vals = np.linspace(x.min(), x.max(), 10)
     y_vals = p_callable(x_vals)
 
     plt.plot(x_vals, y_vals, color='red')
@@ -412,7 +415,7 @@ print("*************************************************************************
 print("*                                    EJEMPLOS                                    *")
 print("**********************************************************************************")
 print("                                                                                  ")
-print(" Se generan los 20 pares de numeros aleatorios enteros.                           ")
+print("Se generan los 20 pares de numeros aleatorios enteros.                           ")
 pares = generador_pares(-10, 10)
 print("Los 20 pares generados aleatoriamente son:                                        ")
 for i in range(len(pares)):
