@@ -154,9 +154,7 @@ def my_divided_diff(pares):
             else:
                 coef[i][j] = (coef[i + 1][j - 1] - coef[i][j - 1]) / (x[i + j] - x[i])
 
-    # Devuelve la Matriz de Coeficientes. En la que la diagonal son los coeficientes del polinomio
-    coef = np.diag(coef)
-          
+    # Devuelve la Matriz de Coeficientes        
     return coef
 
 # ------------------------------------------------------------------------------------------------------------
@@ -167,8 +165,8 @@ def generador_pares(cota_minima, cota_maxima):
 
     # Para evitar errores de un mismo valor xi con varios yi, el replace=False hace que no peudan repetirse esos 
     # numeros aleatorios. En el caso de yi puede repetirse. Cumpliendo con la Inyectividad
-    x_set = np.random.choice(rango, size=5, replace=False)
-    y_set = np.random.choice(rango, size=5, replace=True)
+    x_set = np.random.choice(rango, size=20, replace=False)
+    y_set = np.random.choice(rango, size=20, replace=True)
 
     # Ordena los pares de forma ascendente
     lista_pares = list(zip(x_set, y_set))
@@ -201,7 +199,7 @@ def aleator_pares(pares):
 # Newton fun
 def my_newton(poly, x0):
     # Se establece el error a "e"
-    e = 0.000001
+    e = 0.001
 
     # Se crea la variable
     x = sym.Symbol('x')
@@ -225,10 +223,16 @@ def my_newton(poly, x0):
         
 # Format Print
 def my_poly_format(coefs):
+    # Toma la primer fila de la matriz de coeficientes
+    primer_fila = coefs[0, :]
+
+    # Redondea los valores de la primer_fila a 2 decimales
+    rounded_fila = np.round_(primer_fila, decimals=2)
+
     # agrega los valores guardados y genera un polinomio en base a la cantidad de coeficientes
-    poly = np.poly1d(np.array(coefs))
+    nice_poly_str = np.poly1d(rounded_fila[::-1])
     
-    return poly
+    return nice_poly_str
 
 # ------------------------------------------------------------------------------------------------------------
 # Plots
