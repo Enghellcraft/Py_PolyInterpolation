@@ -232,6 +232,9 @@ def my_newton(poly, x0):
 
 def my_newton_DD(coef, x_0):
     
+    # Castea los coeficientes a Float 128
+    coef = np.array(coef, dtype=np.float64)
+    
     # Se construye el polinomio completo
     poly = np.poly1d(np.ravel(coef))
     
@@ -249,11 +252,24 @@ def my_newton_DD(coef, x_0):
     derivative_poly = np.poly1d(der_coef)
 
     for i in range(150):
-        i +=i
-        x_n = x_0 - (poly(x_0) / derivative_poly(x_0))
-        if abs(derivative_poly(x_n)) < e:
-            root = x_n
+        i += i
+        if derivative_poly(x_0) == 0:
+            return print(f"La derivada en este Punto x = {x_0} es cero y no se puede continuar")
+        der_val = derivative_poly(x_0)
+        if abs(der_val) < e:
+            root = x_0
             return print(f"El Polinomio por Diferencias Divididas posee una raiz en: ({root:.1f}, 0)        ")
+        poly_val = poly(x_0)
+        if np.isnan(der_val) or np.isnan(poly_val):
+            return print(f"En el punto x = {x_0} se encuentra un NaN y no se peude continuar")
+        log_poly_val = np.log(np.abs(poly_val))
+        log_der_val = np.log(np.abs(der_val))
+        if np.isinf(log_poly_val) or np.isinf(log_der_val):
+            return print(f"En el punto x = {x_0} se encuentra un infinito y no se peude continuar")
+        log_x_n = np.log(np.abs(x_0)) - log_poly_val + log_der_val
+        if np.isinf(log_x_n):
+            return print(f"En el punto x = {x_0} se encuentra un infinito y no se peude continuar")
+        x_n = np.sign(poly_val) * np.exp(log_x_n)
         x_0 = x_n
         if (i == 150):
             # Si no se encuentra un raiz al máximo de iteraciones establecido:
