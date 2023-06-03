@@ -196,10 +196,10 @@ def aleator_pares(pares):
     randomness = pares
     return random.shuffle(randomness)
 
-# Newton fun
+# Newton funs
 def my_newton(poly, x0):
     # Se establece el error a "e"
-    e = 0.001
+    e = 0.000001
 
     # Se crea la variable
     x = sym.Symbol('x')
@@ -219,7 +219,34 @@ def my_newton(poly, x0):
         return x0
     else:
         return my_newton(poly, x0 - ((poly/df).subs(x,x0).evalf()))    
+
+def my_newton_DD(coef, x_0):
     
+    # Se construye el polinomio completo
+    poly = np.poly1d(np.ravel(coef))
+    
+    # Se establece el error a "e"
+    e = 0.000001
+    
+    # Se toma para iterar la cantidad de coeficientes menos uno
+    n = len(coef) - 1
+    
+    # Se calcula la derivada
+    der_coef = [n * coef[i] for i in range(n)]
+    der_coef = np.ravel(der_coef)  
+    
+    # Se construye el polinomio
+    derivative_poly = np.poly1d(der_coef)
+
+    for i in range(100):
+        x_n = x_0 - (poly(x_0) / derivative_poly(x_0))
+        if abs(derivative_poly(x_n)) < e:
+            return x_n
+        x_0 = x_n
+
+    # Si no se encuentra un raiz al máximo de iteraciones establecido en 100:
+    return print("No se ha encontrado una raiz en 100 iteraciones")
+     
         
 # Format Print
 def my_poly_format(coefs):
@@ -426,8 +453,7 @@ poly_N = my_newton_poly(pares)
 graph_details_newton(pares, poly_N)
 print("                                                                                  ")
 # Se toma un x0 = 1
-x0 = 1
-root = my_newton(poly_N, x0)
+root = my_newton(poly_N, x0 = 1)
 print(f"El Polinomio por Newton posee una raiz en: ({root:.1f}, 0)                       ")
 print("                                                                                  ")
 print("                           ********* LAGRANGE *********                           ")
@@ -435,17 +461,15 @@ poly_L = my_lagrange_poly(pares)
 graph_details_lagrange(pares, poly_L)
 print("                                                                                  ")
 # Se toma un x0 = 1
-x0 = 1
-my_newton(poly_L, x0)
+my_newton(poly_L, x0 = 1 )
 print(f"El Polinomio por Lagrange posee una raiz en: ({root:.1f}, 0)                     ")
 print("                                                                                  ")
 print("                     ********* DIFERENCIAS DIVIDIDAS *********                    ")
-poly_DD = my_divided_diff(pares)
-graph_details_div_diff(pares, poly_DD)
+poly_DD = my_divided_diff_poly(pares)
+#graph_details_div_diff(pares, poly_DD)
 print("                                                                                  ")
 # Se toma un x0 = 1
-x0 = 1
-root = my_newton(poly_DD, x0)
+root = my_newton_DD(poly_DD, x_0 = 1)
 print(f"El Polinomio por Diferencias Divididas posee una raiz en: ({root:.1f}, 0)        ")
 print("                                                                                  ")
 print("                                                                                  ")
