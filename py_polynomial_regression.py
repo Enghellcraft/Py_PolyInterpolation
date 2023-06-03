@@ -280,6 +280,12 @@ def my_poly_general_format(poly):
     x = sym.symbols('x')
     poly_obj = sym.Poly.from_list(coefs, gens=x)
 
+    # Adquiere el MCM de los denominadores de los coeficientes
+    lcm_denom = sym.lcm_list([sym.denom(c) for c in coefs])
+
+    # Multiplica el polinomio por el MCM para obtener los coeficientes
+    poly_obj = poly_obj * lcm_denom
+
     # Convierte el objeto en una expresión SymPy
     expr = poly_obj.as_expr()
 
