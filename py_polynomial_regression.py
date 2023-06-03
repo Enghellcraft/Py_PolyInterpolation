@@ -77,7 +77,7 @@ def my_newton_poly(pares_xy):
     poly = sym.simplify(poly)
 
     print("\n\nEl polinomio de Newton obtenido es:")
-    print(poly)
+    print(my_poly_general_format(poly))
 
     return poly
 
@@ -111,7 +111,7 @@ def my_lagrange_poly(pares):
     poly = sym.simplify(poly)
 
     print("El polinomio por Lagrange obtenido es:")
-    print(poly)
+    print(my_poly_general_format(poly))
     return poly
 
 # ------------------------------------------------------------------------------------------------------------
@@ -137,7 +137,7 @@ def my_divided_diff_poly(pares):
         print(row_str)
 
     print("El polinomio por Diferencias Divididas obtenido es:")
-    print(my_poly_format(coef))
+    print(my_poly_DD_format(coef))
 
     return coef
 
@@ -205,6 +205,7 @@ def aleator_pares(pares):
     randomness = pares
     return random.shuffle(randomness)
 
+# ------------------------------------------------------------------------------------------------------------
 # Newton funs
 def my_newton(poly, x0):
     # Se establece el error a "e"
@@ -247,20 +248,20 @@ def my_newton_DD(coef, x_0):
     # Se construye el polinomio
     derivative_poly = np.poly1d(der_coef)
 
-    for i in range(200):
+    for i in range(150):
         i +=i
         x_n = x_0 - (poly(x_0) / derivative_poly(x_0))
         if abs(derivative_poly(x_n)) < e:
             root = x_n
             return print(f"El Polinomio por Diferencias Divididas posee una raiz en: ({root:.1f}, 0)        ")
         x_0 = x_n
-        if (i == 200):
+        if (i == 150):
             # Si no se encuentra un raiz al máximo de iteraciones establecido:
-            return print("No se ha encontrado una raiz en 200 iteraciones")
+            return print("No se ha encontrado una raiz en 150 iteraciones")
 
-        
+# ------------------------------------------------------------------------------------------------------------        
 # Format Print
-def my_poly_format(coefs):
+def my_poly_DD_format(coefs):
     # Toma la primer fila de la matriz de coeficientes
     primer_fila = coefs[0, :]
 
@@ -270,6 +271,21 @@ def my_poly_format(coefs):
     # agrega los valores guardados y genera un polinomio en base a la cantidad de coeficientes
     nice_poly_str = np.poly1d(rounded_fila[::-1])
     
+    return nice_poly_str
+
+def my_poly_general_format(poly):
+    # Genera un objeto polinómico desde los coefficientes
+    coefs = sym.Poly(poly).coeffs()
+    n = len(coefs) - 1
+    x = sym.symbols('x')
+    poly_obj = sym.Poly.from_list(coefs, gens=x)
+
+    # Convierte el objeto en una expresión SymPy
+    expr = poly_obj.as_expr()
+
+    # Agrega el formato string a la expresión
+    nice_poly_str = str(expr).replace("**", "^").replace("*", "")
+
     return nice_poly_str
 
 # ------------------------------------------------------------------------------------------------------------
@@ -575,4 +591,8 @@ print(" • Los tres métodos permiten encontrar una función polinómica que pa
 print("   conjunto de puntos de manera continua, generalizando la propiedad euclidiana de")
 print("   que por dos puntos distintos pasa siempre una (única) recta.                   ")
 print("                                                                                  ")
+# add polynomial accuracy
+# roots not converging
+# roots outside of plot range
+# methods comparison
 print("                                                                                  ")
