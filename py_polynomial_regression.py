@@ -2,9 +2,8 @@
 """PENDIENTES:
     * Arreglar el grafico de diferencias divididas
     * Cuando eso funcione, agregar grafico con los puntos y los 3 polinomios juntos
-    * Marcar las raices que salen el la grafica de cada polinomio (NO el de todos)
     * Terminar conclusiones (eso lo termino yo, priorizar lo de arriba)
-    * Hacer pots de residuos (diferencias entre los valores actuales y los interpolados con el polinomio)
+    * Hacer pots de residuos (diferencias entre los valores actuales y los interpolados con el polinomio) --Haciendo ahora
 """
 
 # TP Métodos Numéricos - 2023
@@ -17,10 +16,14 @@
 import numpy as np
 import sympy as sym
 from sympy import *
+from sympy import diff
+from sympy import lambdify
 import random
 from fractions import Fraction
 import matplotlib.pyplot as plt
-from sympy import diff
+import mpmath
+mpmath.mp.dps = 200
+
 
 # Funs
 # ------------------------------------------------------------------------------------------------------------
@@ -208,27 +211,33 @@ def aleator_pares(pares):
 # ------------------------------------------------------------------------------------------------------------
 # Newton funs
 def my_newton(poly, x0):
-    # Se establece el error a "e"
-    e = 0.000001
+    max_iter = 150
+    iteracion = 0
+    while iteracion < max_iter:
+        # Se establece el error a "e"
+        e = 0.000001
 
-    # Se crea la variable
-    x = sym.Symbol('x')
-    
-    funcion = sympify(poly)
-
-    # Se realiza la derivada
-    df= funcion.diff(x)
-    
-    # Verifica que la derivada primera no sea cero, ya que no aseura su convergencia a una raíz
-    if df == 0:
-        return print("No converge o lo hara con gran error ya que la derivada de la funcion es Cero")
-
-    f_x0 = funcion.subs({x: x0}).evalf()
+        # Se crea la variable
+        x = sym.Symbol('x')
         
-    if Abs((poly.subs(x,x0)).evalf()) < e:
-        return x0
-    else:
-        return my_newton(poly, x0 - ((poly/df).subs(x,x0).evalf()))      
+        funcion = sympify(poly)
+
+        # Se realiza la derivada
+        df= funcion.diff(x)
+        
+        # Verifica que la derivada primera no sea cero, ya que no aseura su convergencia a una raíz
+        if df == 0:
+            return print("No converge o lo hara con gran error ya que la derivada de la funcion es Cero")
+
+        f_x0 = funcion.subs({x: x0}).evalf()
+        
+        iteracion += 1
+            
+        if Abs((poly.subs(x,x0)).evalf()) < e:
+            return x0
+        else:
+            return my_newton(poly, x0 - ((poly/df).subs(x, x0).evalf()))    
+    raise Exception("No se ha encontrado una raiz en 150 iteraciones")
 
 def my_newton_DD(coef, x_0):
     
@@ -404,7 +413,40 @@ def graph_details_div_diff(pares, poly_coeffs, root):
     plt.gca().set_facecolor('#e9edc9')
 
     plt.show()
+    
+# Plots on Residuals
+def calculate_residuals(x_vals, poly):
+    numpy_poly = np.poly1d(poly)
+    residuals = []
 
+    for x_i in range(len(x_vals)):
+        residuals.append(numpy_poly(x_vals[x_i]))
+
+    return residuals
+
+# Newton
+def my_plot_residuals(pares, poly):
+    x, y = separador_pares_x_y(pares)
+
+    x_vals = np.linspace(min(x), max(x), 5)
+    residuals = calculate_residuals(x_vals, poly)
+    
+    fig, ax = plt.subplots()
+    ax.scatter(x, y)
+    x_range = np.linspace(min(x), max(x), 5)
+
+    ax.set_title("Gráfico de Pares ordenados y Polinomio Newton")
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    
+    plt.grid(True)
+    plt.gca().set_facecolor('#e9edc9')
+
+    plt.show()
+        
+# Lagrange
+
+# Diferencias Divididas    
 
 # ------------------------------------------------------------------------------------------------------------
 # Prints
@@ -517,6 +559,7 @@ print("                                                                         
 root_N = my_newton(poly_N, x0 = 1)
 print(f"El Polinomio por Newton posee una raiz en: ({root_N:.1f}, 0)                     ")
 graph_details_newton(pares, poly_N, root_N)
+my_plot_residuals(pares, poly_N)
 print("                                                                                  ")
 
 print("                           ********* LAGRANGE *********                           ")
