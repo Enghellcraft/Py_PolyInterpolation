@@ -1,8 +1,6 @@
 
 """PENDIENTES:
-    * Cuando eso funcione, agregar grafico con los puntos y los 3 polinomios juntos
     * Terminar conclusiones (eso lo termino yo, priorizar lo de arriba)
-    * Hacer pots de residuos (diferencias entre los valores actuales y los interpolados con el polinomio) --Haciendo ahora
 """
 
 # TP Métodos Numéricos - 2023
@@ -177,8 +175,8 @@ def generador_pares(cota_minima, cota_maxima):
 
     # Para evitar errores de un mismo valor xi con varios yi, el replace=False hace que no peudan repetirse esos 
     # numeros aleatorios. En el caso de yi puede repetirse. Cumpliendo con la Inyectividad
-    x_set = np.random.choice(rango, size=20, replace=False)
-    y_set = np.random.choice(rango, size=20, replace=True)
+    x_set = np.random.choice(rango, size=3, replace=False)
+    y_set = np.random.choice(rango, size=3, replace=True)
 
     # Ordena los pares de forma ascendente
     lista_pares = list(zip(x_set, y_set))
@@ -456,45 +454,6 @@ def graph_details_all(pares, poly_newton, poly_lagrange, poly_coeffs_dd, order):
 
     plt.show()
     
-# Plots on Evaluation
-def calculate_evaluation(x_vals, poly):
-    numpy_poly = np.poly1d(poly)
-    residuals = []
-
-    for x_i in range(len(x_vals)):
-        residuals.append(ast.literal_eval(numpy_poly(x_vals)))
-
-    return np.array(residuals)
-
-# Newton
-def my_plot_polynomial_eval(pares, poly):
-    x, y = separador_pares_x_y(pares)
-
-    x_vals = np.linspace(min(x), max(x), 20)
-    residuals = calculate_evaluation(x_vals, poly)
-    
-    residuals = np.array(residuals).reshape(len(x),)
-    
-    print("Shape of x:", x.shape)
-    print("Shape of residuals:", residuals.shape)
-    
-    flat_x = np.ravel(x)
-    
-    plt.scatter(flat_x, y, color='blue', label='Pares Originales')
-    plt.scatter(flat_x, residuals, color='red', label='Pares evaluados en Polinomio')
-
-    plt.title("Gráfico de Pares ordenados y Polinomio Newton")
-    plt.xlabel("X")
-    plt.ylabel("Y")
-    
-    plt.grid(True)
-    plt.gca().set_facecolor('#e9edc9')
-
-    plt.show()
-        
-# Lagrange
-
-# Diferencias Divididas    
 
 # ------------------------------------------------------------------------------------------------------------
 # Prints
@@ -523,7 +482,7 @@ print("  esas cotas. Ordenar los pares según x.                                
 print("  2) Generar un polinomio interpolador por esos 20 pares, según el método de Newton.")
 print("   Testear el grado del polinomio obtenido y graficar marcando los pares de datos.")
 print("  3) Ordenarlos al revés y obtener otro polinomio interpolador. ¿Qué grado tiene?  ")
-print("  ¿Es el mismo? ¿Cómo se hace para saber si el el mismo polinomio? Graficar       ")
+print("  ¿Es el mismo? ¿Cómo se hace para saber si es el mismo polinomio? Graficar       ")
 print("  4) Lo mismo desordenando los pares.")
 print("  5) ¿Se puede poner el programa de obtención de raíces como subrutina de este y  ")
 print("  buscar al menos una raíz de uno de los polinomios?   ")
@@ -729,9 +688,29 @@ print(" • Los tres métodos permiten encontrar una función polinómica que pa
 print("   conjunto de puntos de manera continua, generalizando la propiedad euclidiana de")
 print("   que por dos puntos distintos pasa siempre una (única) recta.                   ")
 print("                                                                                  ")
-# add polynomial accuracy
-# roots not converging
-# roots outside of plot range
+print(" • Respecto a la exactitud de los polinomios, es observable la diferencia entre   ")
+print("   Lagrange y Newton que interpolan polinomios iguales y mas cercanos a los pares ")
+print("   ordenados originales, y el de diferencias divididas cuya exactitud es menor    ")
+print("   y sólo concuerda algunos pares ordenados originales.                           ")
+print("                                                                                  ")
+print(" • En cuanto a los grados de los polinomios encontrados, podemos observar que todos")
+print("   cumplen con Gr(p) < n, y se obtienen en los distintos casos, diferentes grados ")
+print("   pero siempre en cumplimiento de esa regla.                                     ")
+print("                                                                                  ")
+print(" • Las raices de los polinomios se obtuvieron por Newton-Raphson, en la mayoria de")
+print("   los casos se da una convergencia a una raiz, pero puede suceder que dado el valor")
+print("   inicial ingresado, no halle ninguna.                                           ")
+print("   Por otra parte también peude verse casos donde la raiz esta fuera del rango de ")
+print("   los pares ordenados provistos y es visible graficamente como coordenada, fuera ")
+print("   de la curva del polinomio hallado.                                             ")
+print("                                                                                  ")
+print(" • En las gráficas puede observarse como el polinomio")
+print("   los casos se da una convergencia a una raiz, pero puede suceder que dado el valor")
+print("   inicial ingresado, no halle ninguna.                                           ")
+print("   Por otra parte también peude verse casos donde la raiz esta fuera del rango de ")
+print("   los pares ordenados provistos y es visible graficamente como coordenada, fuera ")
+print("   de la curva del polinomio hallado.                                             ")
+print("                                                                                  ")
 # methods comparison
 # Runge's phenomenon on data points being equally spaced
 print("                                                                                  ")
