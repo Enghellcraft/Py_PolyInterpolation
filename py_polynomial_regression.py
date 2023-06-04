@@ -175,8 +175,8 @@ def generador_pares(cota_minima, cota_maxima):
 
     # Para evitar errores de un mismo valor xi con varios yi, el replace=False hace que no peudan repetirse esos 
     # numeros aleatorios. En el caso de yi puede repetirse. Cumpliendo con la Inyectividad
-    x_set = np.random.choice(rango, size=3, replace=False)
-    y_set = np.random.choice(rango, size=3, replace=True)
+    x_set = np.random.choice(rango, size=20, replace=False)
+    y_set = np.random.choice(rango, size=20, replace=True)
 
     # Ordena los pares de forma ascendente
     lista_pares = list(zip(x_set, y_set))
@@ -500,7 +500,7 @@ print("  buscar al menos una raíz de uno de los polinomios?   ")
 print("  6) Pueden hacer una subrutina que halle por Lagrange, con el mismo conjunto de pares? ")
 print("  7) Pueden hacer una subrutina que halle por diferencias divididas, con el       ")
 print("  mismo conjunto de pares?                                                        ")
-print("  ¿Qué se puede decir? ¿Qué conclusiones se pueden sacar?                         ")
+print("  8) ¿Qué se puede decir? ¿Qué conclusiones se pueden sacar?                      ")
 
 #  I) Theory
 print("                                                                                  ")
@@ -715,13 +715,21 @@ print("   Por otra parte también peude verse casos donde la raiz esta fuera del
 print("   los pares ordenados provistos y es visible graficamente como coordenada, fuera ")
 print("   de la curva del polinomio hallado.                                             ")
 print("                                                                                  ")
-print(" • En las gráficas puede observarse como el polinomio")
-print("   los casos se da una convergencia a una raiz, pero puede suceder que dado el valor")
-print("   inicial ingresado, no halle ninguna.                                           ")
-print("   Por otra parte también peude verse casos donde la raiz esta fuera del rango de ")
-print("   los pares ordenados provistos y es visible graficamente como coordenada, fuera ")
-print("   de la curva del polinomio hallado.                                             ")
+print(" • En las gráficas y cálculos puede observarse como los polinomios de Newton y    ")
+print("   Lagrange, se mantienen constantes a pesar del cambio de los pares ordenados a: ")
+print("   ascendente, descendente y aletorio. Sin embargo, en el caso del polinomio de   ")
+print("   diferencias divididas, hay leves cambios en los cálculos y por ende las gráficas")
+print("   difieren levemente, esto se debe a la relación entre los partes ordenados que  ")
+print("   en el procesamiento de este polinomio.                                         ")
+print("   En el caso de Lagrange se mantiene ya que realiza en un solo cálculo con todos ")
+print("   los pares ordenados. Y para Newton, si bien la convergencia al polinomio modifica")
+print("   los pasos intermedios, el cálculo final depende exclusivamente de los valores   ")
+print("   de x, por lo que en todos los casos terminará con el mismo resultado.           ")
 print("                                                                                  ")
-# methods comparison
-# Runge's phenomenon on data points being equally spaced
+print(" • Cabe destacar que existe el fenómeno Runge como problema de oscilación en los   ")
+print("   extremos de un intervalo. Esto implica que el polinomio interpolado, puede     ")
+print("   ajustarse idealmente a los valores intermedios pero no en los extremos.        ")
+print("   Aquí se puede observar el comportamiento en las gráficas de Diferencias        ")
+print("   Divididas, donde teniendo puntos equidistantes con abruptas subidas y bajadas, ")
+print("   además de su parecido a la derivación, genera dicho fenómeno.                  ")
 print("                                                                                  ")
