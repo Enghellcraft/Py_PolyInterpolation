@@ -470,7 +470,7 @@ def graph_details_all_pairs_DD(pares, poly_asc, poly_inv, poly_rand, pol_type):
     fig, ax = plt.subplots()
     ax.scatter(x, y)
 
-    x_range = np.linspace(min(x), max(x), 50)
+    x_range = np.linspace(min(x), max(x), 20)
     
     f_asc = my_poly_DD_format(poly_asc)
     y_range_asc = f_asc(x_range)
@@ -812,4 +812,11 @@ print("   rangos de los pares ordenados, en este caso decidimos realizarlo de -1
 print("   para asegurar una raíz, sin embargo como se anotó previamente, algunas raíces  ")
 print("   se pueden observar en el gráfico como 'continuación teórica' del polinomio en ")
 print("   cuestión; aunque exceda el rango dado en los pares creados.")
+print("                                                                                  ")
+print(" • NOTA4: si bien se trató de considerar todos los posibles errores de desborde en")
+print("   Newton, en especial para diferencias divididas, puede observarse algún error   ")
+print("   antes de la impresión del error contemplado. Para evitarlo es posible normalizar")
+print("   los valores, sin embargo esto interferiría con las comparaciones de los otros dos")
+print("   polinomios, por lo que decidimos despreciar esa línea de error ya que el motivo")
+print("   de la misma se justifica en la siguiente impresión.                            ")
 print("                                                                                  ")
