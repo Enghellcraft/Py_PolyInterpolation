@@ -343,14 +343,18 @@ def graph_details_newton(pares, poly, root, order):
 
     ax.plot(x_range, y_range, color='green')
     
-    ax.plot(root, 0, color='orange', marker='o')
-
+    if not (np.isnan(float(root))):
+        root_leyend = 'Punto de raíz'
+        plt.plot(root, 0, color='orange', marker='o')
+    else:
+        root_leyend = 'Raíz no encontrada'
+    
     ax.set_title(f"Gráfico de Pares {order} y Polinomio Newton")
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
 
     color = ['blue', 'green', 'orange']
-    labels = [f'Pares {order}', 'Polinomio Newton', 'Punto de raíz']
+    labels = [f'Pares {order}', 'Polinomio Lagrange', f'{root_leyend}']
     handlelist = [plt.plot([], marker="o", ls="", color=color[i])[0] for i in range(3)]
     plt.legend(handlelist, labels, loc='upper left')
 
@@ -373,14 +377,18 @@ def graph_details_lagrange(pares, poly, root, order):
 
     ax.plot(x_range, y_range, color='purple')
     
-    ax.plot(root, 0, color='orange', marker='o')
+    if not(np.isnan(float(root))):
+        root_leyend = 'Punto de raíz'
+        plt.plot(root, 0, color='orange', marker='o')
+    else:
+        root_leyend = 'Raíz no encontrada'
 
     ax.set_title(f"Gráfico de Pares {order} y Polinomio Lagrange")
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
 
     color = ['blue', 'purple', 'orange']
-    labels = [f'Pares {order}', 'Polinomio Lagrange', 'Punto de raíz']
+    labels = [f'Pares {order}', 'Polinomio Lagrange', f'{root_leyend}']
     handlelist = [plt.plot([], marker="o", ls="", color=color[i])[0] for i in range(3)]
     plt.legend(handlelist, labels, loc='upper left')
 
@@ -399,22 +407,25 @@ def graph_details_div_diff(pares, poly_coeffs, root, order):
     
     p_callable = my_poly_DD_format(poly_coeffs)
 
-    x_vals = np.linspace(x.min(), x.max(), 100)
+    x_vals = np.linspace(x.min(), x.max(), 20)
     y_vals = p_callable(x_vals)
 
     plt.ylim(-100, 100)
 
     plt.plot(x_vals, y_vals, color='red')
     
-    if not np.isnan(root_DD):
+    if not(np.isnan(float(root))):
+        root_leyend = 'Punto de raíz'
         plt.plot(root, 0, color='orange', marker='o')
+    else:
+        root_leyend = 'Raíz no encontrada'
 
     plt.title(f"Gráfico de Pares {order} y Polinomio Diferencias Divididas")
     plt.xlabel("X")
     plt.ylabel("Y")
     
     color = ['blue', 'red', 'orange']
-    labels = [f'Pares {order}', 'Polinomio Dif. Divididas', 'Punto de raíz']
+    labels = [f'Pares {order}', 'Polinomio Dif. Divididas', f'{root_leyend}']
     handlelist = [plt.plot([], marker="o", ls="", color=color[i])[0] for i in range(3)]
     plt.legend(handlelist, labels, loc='upper left')
 
@@ -431,15 +442,15 @@ def graph_details_all(pares, poly_newton, poly_lagrange, poly_coeffs_dd, order):
     fig, ax = plt.subplots()
     ax.scatter(x, y)
 
-    x_range = np.linspace(min(x), max(x), 100)
+    x_range = np.linspace(min(x), max(x), 20)
     
     f_newton = sym.lambdify(sym.Symbol('x'), poly_newton)
     y_range_newton = f_newton(x_range)
-    ax.plot(x_range, y_range_newton, color='green', label='Polinomio Newton', linewidth=3)
+    ax.plot(x_range, y_range_newton, color='green', label='Polinomio Newton', linewidth=4)
 
     f_lagrange = sym.lambdify(sym.Symbol('x'), poly_lagrange)
     y_range_lagrange = f_lagrange(x_range)
-    ax.plot(x_range, y_range_lagrange, color='purple', label='Polinomio Lagrange')
+    ax.plot(x_range, y_range_lagrange, color='yellow', label='Polinomio Lagrange')
 
     p_callable = my_poly_DD_format(poly_coeffs_dd)
     y_range_dd = p_callable(x_range)
