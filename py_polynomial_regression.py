@@ -1,6 +1,5 @@
 
 """PENDIENTES:
-    * Arreglar el grafico de diferencias divididas
     * Cuando eso funcione, agregar grafico con los puntos y los 3 polinomios juntos
     * Terminar conclusiones (eso lo termino yo, priorizar lo de arriba)
     * Hacer pots de residuos (diferencias entre los valores actuales y los interpolados con el polinomio) --Haciendo ahora
@@ -261,29 +260,38 @@ def my_newton_DD(coef, x_0):
     # Se construye el polinomio
     derivative_poly = np.poly1d(der_coef)
 
+    root = np.nan
+
     for i in range(150):
         i += i
         if derivative_poly(x_0) == 0:
-            return print(f"La derivada en este Punto x = {x_0} es cero y no se puede continuar")
+            print(f"La derivada en este Punto x = {x_0} es cero y no se puede continuar")
+            return root
         der_val = derivative_poly(x_0)
         if abs(der_val) < e:
             root = x_0
-            return print(f"El Polinomio por Diferencias Divididas posee una raiz en: ({root:.1f}, 0)        ")
+            print(f"El Polinomio por Diferencias Divididas posee una raiz en: ({root:.1f}, 0)        ")
+            return root
         poly_val = poly(x_0)
         if np.isnan(der_val) or np.isnan(poly_val):
-            return print(f"En el punto x = {x_0} se encuentra un NaN y no se peude continuar")
+            print(f"En el punto x = {x_0} se encuentra un NaN y no se peude continuar")
+            return root
         log_poly_val = np.log(np.abs(poly_val))
         log_der_val = np.log(np.abs(der_val))
         if np.isinf(log_poly_val) or np.isinf(log_der_val):
-            return print(f"En el punto x = {x_0} se encuentra un infinito y no se peude continuar")
+            print(f"En el punto x = {x_0} se encuentra un infinito y no se peude continuar")
+            return root
         log_x_n = np.log(np.abs(x_0)) - log_poly_val + log_der_val
         if np.isinf(log_x_n):
-            return print(f"En el punto x = {x_0} se encuentra un infinito y no se peude continuar")
+            print(f"En el punto x = {x_0} se encuentra un infinito y no se peude continuar")
+            return root
         x_n = np.sign(poly_val) * np.exp(log_x_n)
         x_0 = x_n
         if (i == 150):
             # Si no se encuentra un raiz al máximo de iteraciones establecido:
-            return print("No se ha encontrado una raiz en 150 iteraciones")
+            print("No se ha encontrado una raiz en 150 iteraciones")
+            return root
+
 
 # ------------------------------------------------------------------------------------------------------------        
 # Format Print
@@ -323,7 +331,7 @@ def my_poly_general_format(poly):
 # ------------------------------------------------------------------------------------------------------------
 # Plots
 # NEWTON
-def graph_details_newton(pares, poly, root):
+def graph_details_newton(pares, poly, root, order):
     x, y = separador_pares_x_y(pares)
 
     fig, ax = plt.subplots()
@@ -337,10 +345,10 @@ def graph_details_newton(pares, poly, root):
     
     ax.plot(root, 0, color='orange', marker='o')
 
-    ax.set_title("Gráfico de Pares ordenados y Polinomio Newton")
+    ax.set_title(f"Gráfico de Pares {order} y Polinomio Newton")
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
-    
+
     color = ['blue', 'green', 'orange']
     labels = ['Pares ordenados', 'Polinomio Newton', 'Punto de raíz']
     handlelist = [plt.plot([], marker="o", ls="", color=color[i])[0] for i in range(3)]
@@ -353,7 +361,7 @@ def graph_details_newton(pares, poly, root):
     plt.show()
 
 # LAGRANGE
-def graph_details_lagrange(pares, poly, root):
+def graph_details_lagrange(pares, poly, root, order):
     x, y = separador_pares_x_y(pares)
 
     fig, ax = plt.subplots()
@@ -367,7 +375,7 @@ def graph_details_lagrange(pares, poly, root):
     
     ax.plot(root, 0, color='orange', marker='o')
 
-    ax.set_title("Gráfico de Pares ordenados y Polinomio Lagrange")
+    ax.set_title(f"Gráfico de Pares {order} y Polinomio Lagrange")
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
 
@@ -383,7 +391,7 @@ def graph_details_lagrange(pares, poly, root):
     plt.show()
 
 # DIFERENCIAS DIVIDIDAS
-def graph_details_div_diff(pares, poly_coeffs, root):
+def graph_details_div_diff(pares, poly_coeffs, root, order):
     # Recibe lista de pares y polinomio generado por diferencias divididas en formato String
     x, y = separador_pares_x_y(pares)
 
@@ -394,13 +402,14 @@ def graph_details_div_diff(pares, poly_coeffs, root):
     x_vals = np.linspace(x.min(), x.max(), 20)
     y_vals = p_callable(x_vals)
 
-    plt.ylim(-200,200)
+    plt.ylim(-50,50)
 
     plt.plot(x_vals, y_vals, color='red')
     
-    plt.plot(root, 0, color='orange', marker='o')
+    if not np.isnan(root_DD):
+        plt.plot(root, 0, color='orange', marker='o')
 
-    plt.title("Gráfico de Pares ordenados y Polinomio Diferencias Divididas")
+    plt.title(f"Gráfico de Pares {order} y Polinomio Diferencias Divididas")
     plt.xlabel("X")
     plt.ylabel("Y")
     
@@ -411,6 +420,43 @@ def graph_details_div_diff(pares, poly_coeffs, root):
 
     plt.grid(True)
     # plt.legend()
+    plt.gca().set_facecolor('#e9edc9')
+
+    plt.show()
+
+# All graphs
+def graph_details_all(pares, poly_newton, poly_lagrange, poly_coeffs_dd, root_newton, root_lagrange, root_dd):
+    x, y = zip(*pares)
+
+    fig, ax = plt.subplots()
+    ax.scatter(x, y)
+
+    x_range = np.linspace(min(x), max(x), 100)
+    
+    f_newton = sym.lambdify(sym.Symbol('x'), poly_newton)
+    y_range_newton = f_newton(x_range)
+    ax.plot(x_range, y_range_newton, color='green', label='Polinomio Newton', linewidth=2)
+
+    f_lagrange = sym.lambdify(sym.Symbol('x'), poly_lagrange)
+    y_range_lagrange = f_lagrange(x_range)
+    ax.plot(x_range, y_range_lagrange, color='purple', label='Polinomio Lagrange')
+
+    p_callable = my_poly_DD_format(poly_coeffs_dd)
+    y_range_dd = p_callable(x_range)
+    ax.plot(x_range, y_range_dd, color='red', label='Polinomio Diferencias Divididas')
+
+    ax.plot(root_newton, 0, color='orange', marker='o', label='Punto de raíz Newton')
+    ax.plot(root_lagrange, 0, color='blue', marker='o', label='Punto de raíz Lagrange')
+    if not np.isnan(root_dd):
+        ax.plot(root_dd, 0, color='yellow', marker='o', label='Punto de raíz Diferencias Divididas')
+
+    ax.set_title("Gráfico de Pares ordenados y Polinomios")
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+
+    plt.ylim(-150,150)
+    plt.legend()
+    plt.grid(True)
     plt.gca().set_facecolor('#e9edc9')
 
     plt.show()
@@ -553,6 +599,7 @@ print("                                                                         
 print("                      ********* PARES ASCENDENTES *********                       ")
 print(" Se generan los 20 pares de numeros aleatorios enteros.                           ")
 pares = generador_pares(-10, 10)
+order = "ascendentes"
 print("Los 20 pares generados aleatoriamente son:                                        ")
 for i in range(len(pares)):
     print(pares[i])
@@ -565,29 +612,29 @@ print("                                                                         
 # Se toma un x0 = 1
 root_N = my_newton(poly_N, x0 = 1)
 print(f"El Polinomio por Newton posee una raiz en: ({root_N:.1f}, 0)                     ")
-graph_details_newton(pares, poly_N, root_N)
+graph_details_newton(pares, poly_N, root_N, order)
 #my_plot_polynomial_eval(pares, poly_N)
 print("                                                                                  ")
-
 print("                           ********* LAGRANGE *********                           ")
 poly_L = my_lagrange_poly(pares)
 print("                                                                                  ")
 # Se toma un x0 = 1
 root_L = my_newton(poly_L, x0 = 1 )
 print(f"El Polinomio por Lagrange posee una raiz en: ({root_L:.1f}, 0)                   ")
-graph_details_lagrange(pares, poly_L, root_L)
+graph_details_lagrange(pares, poly_L, root_L, order)
 print("                                                                                  ")
 
 print("                     ********* DIFERENCIAS DIVIDIDAS *********                    ")
 poly_DD = my_divided_diff_poly(pares)
 print("                                                                                  ")
 # Se toma un x0 = 1
-# my_newton_DD(poly_DD, x_0 = 1)
-graph_details_div_diff(pares, poly_DD, 0)
+root_DD = my_newton_DD(poly_DD, x_0 = -20)   
+graph_details_div_diff(pares, poly_DD, root_DD, order)
 print("                                                                                  ")
 #________________________________________________________________________________________________
 print("                      ********* PARES DESCENDENTES *********                      ")
 inversed = inversor_pares(pares)
+order = "descendentes"
 print("Los elementos invertidos son: \n                                                   ")
 for i in range(len(inversed)):
     print(inversed[i])
@@ -597,7 +644,7 @@ print("                                                                         
 # Se toma un x0 = 1
 root_N = my_newton(poly_N, x0 = 1)
 print(f"El Polinomio por Newton posee una raiz en: ({root_N:.1f}, 0)                     ")
-graph_details_newton(inversed, poly_N, root_N)
+graph_details_newton(inversed, poly_N, root_N, order)
 print("                                                                                  ")
 
 print("                           ********* LAGRANGE *********                           ")
@@ -606,20 +653,21 @@ print("                                                                         
 # Se toma un x0 = 1
 root_L = my_newton(poly_L, x0 = 1 )
 print(f"El Polinomio por Lagrange posee una raiz en: ({root_L:.1f}, 0)                   ")
-graph_details_lagrange(inversed, poly_L, root_L)
+graph_details_lagrange(inversed, poly_L, root_L, order)
 print("                                                                                  ")
 
 print("                     ********* DIFERENCIAS DIVIDIDAS *********                    ")
 poly_DD = my_divided_diff_poly(inversed)
 print("                                                                                  ")
 # Se toma un x0 = 1
-my_newton_DD(poly_DD, x_0 = 1)   
-graph_details_div_diff(pares, poly_DD, 0)
+root_DD = my_newton_DD(poly_DD, x_0 = -20)   
+graph_details_div_diff(inversed, poly_DD, root_DD, order)
 print("                                                                                  ")
 #________________________________________________________________________________________________
 print("                      ********* PARES ALEATORIZADOS *********                     ")
 randomness = pares
 random.shuffle(randomness)
+order = "aleatorizados"
 print("Los elementos aleatorizados son: \n                                               ")
 for i in range(len(randomness)):
     print(randomness[i])
@@ -629,7 +677,7 @@ print("                                                                         
 # Se toma un x0 = 1
 root_N = my_newton(poly_N, x0 = 1)
 print(f"El Polinomio por Newton posee una raiz en: ({root_N:.1f}, 0)                     ")
-graph_details_newton(randomness, poly_N, root_N)
+graph_details_newton(randomness, poly_N, root_N, order)
 print("                                                                                  ")
 
 print("                           ********* LAGRANGE *********                           ")
@@ -638,17 +686,19 @@ print("                                                                         
 # Se toma un x0 = 1
 root_L = my_newton(poly_L, x0 = 1 )
 print(f"El Polinomio por Lagrange posee una raiz en: ({root_L:.1f}, 0)                   ")
-graph_details_lagrange(randomness, poly_L, root_L)
+graph_details_lagrange(randomness, poly_L, root_L, order)
 print("                                                                                  ")
 
 print("                     ********* DIFERENCIAS DIVIDIDAS *********                    ")
 poly_DD = my_divided_diff_poly(randomness)
 print("                                                                                  ")
 # Se toma un x0 = 1
-my_newton_DD(poly_DD, x_0 = 1)   
-graph_details_div_diff(pares, poly_DD, 0)
+root_DD = my_newton_DD(poly_DD, x_0 = -20)   
+graph_details_div_diff(randomness, poly_DD, root_DD, order)
 print("                                                                                  ")
 
+# Grafico de las tres funciones superpuestas
+graph_details_all(pares, poly_N, poly_L, poly_DD, root_N, root_L, root_DD)
 ## IV) Conclusions
 print("                                                                                  ")
 print("**********************************************************************************")
