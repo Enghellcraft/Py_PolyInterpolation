@@ -19,6 +19,7 @@ from sympy import *
 from sympy import diff
 from sympy import lambdify
 import random
+import ast
 from fractions import Fraction
 import matplotlib.pyplot as plt
 import mpmath
@@ -327,7 +328,7 @@ def graph_details_newton(pares, poly, root):
 
     fig, ax = plt.subplots()
     ax.scatter(x, y)
-    x_range = np.linspace(min(x), max(x), 5)
+    x_range = np.linspace(min(x), max(x), 20)
 
     f = sym.lambdify(sym.Symbol('x'), poly)
     y_range = f(x_range)
@@ -357,7 +358,7 @@ def graph_details_lagrange(pares, poly, root):
 
     fig, ax = plt.subplots()
     ax.scatter(x, y)
-    x_range = np.linspace(min(x), max(x), 5)
+    x_range = np.linspace(min(x), max(x), 20)
 
     f = sym.lambdify(sym.Symbol('x'), poly)
     y_range = f(x_range)
@@ -390,7 +391,7 @@ def graph_details_div_diff(pares, poly_coeffs, root):
     
     p_callable = my_poly_DD_format(poly_coeffs)
 
-    x_vals = np.linspace(x.min(), x.max())
+    x_vals = np.linspace(x.min(), x.max(), 20)
     y_vals = p_callable(x_vals)
 
     plt.ylim(-200,200)
@@ -414,30 +415,36 @@ def graph_details_div_diff(pares, poly_coeffs, root):
 
     plt.show()
     
-# Plots on Residuals
-def calculate_residuals(x_vals, poly):
+# Plots on Evaluation
+def calculate_evaluation(x_vals, poly):
     numpy_poly = np.poly1d(poly)
     residuals = []
 
     for x_i in range(len(x_vals)):
-        residuals.append(numpy_poly(x_vals[x_i]))
+        residuals.append(ast.literal_eval(numpy_poly(x_vals)))
 
-    return residuals
+    return np.array(residuals)
 
 # Newton
-def my_plot_residuals(pares, poly):
+def my_plot_polynomial_eval(pares, poly):
     x, y = separador_pares_x_y(pares)
 
-    x_vals = np.linspace(min(x), max(x), 5)
-    residuals = calculate_residuals(x_vals, poly)
+    x_vals = np.linspace(min(x), max(x), 20)
+    residuals = calculate_evaluation(x_vals, poly)
     
-    fig, ax = plt.subplots()
-    ax.scatter(x, y)
-    x_range = np.linspace(min(x), max(x), 5)
+    residuals = np.array(residuals).reshape(len(x),)
+    
+    print("Shape of x:", x.shape)
+    print("Shape of residuals:", residuals.shape)
+    
+    flat_x = np.ravel(x)
+    
+    plt.scatter(flat_x, y, color='blue', label='Pares Originales')
+    plt.scatter(flat_x, residuals, color='red', label='Pares evaluados en Polinomio')
 
-    ax.set_title("Gráfico de Pares ordenados y Polinomio Newton")
-    ax.set_xlabel("X")
-    ax.set_ylabel("Y")
+    plt.title("Gráfico de Pares ordenados y Polinomio Newton")
+    plt.xlabel("X")
+    plt.ylabel("Y")
     
     plt.grid(True)
     plt.gca().set_facecolor('#e9edc9')
@@ -559,7 +566,7 @@ print("                                                                         
 root_N = my_newton(poly_N, x0 = 1)
 print(f"El Polinomio por Newton posee una raiz en: ({root_N:.1f}, 0)                     ")
 graph_details_newton(pares, poly_N, root_N)
-my_plot_residuals(pares, poly_N)
+#my_plot_polynomial_eval(pares, poly_N)
 print("                                                                                  ")
 
 print("                           ********* LAGRANGE *********                           ")
@@ -672,4 +679,5 @@ print("                                                                         
 # roots not converging
 # roots outside of plot range
 # methods comparison
+# Runge's phenomenon on data points being equally spaced
 print("                                                                                  ")
