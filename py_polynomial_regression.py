@@ -350,7 +350,7 @@ def graph_details_newton(pares, poly, root, order):
     ax.set_ylabel("Y")
 
     color = ['blue', 'green', 'orange']
-    labels = ['Pares ordenados', 'Polinomio Newton', 'Punto de raíz']
+    labels = [f'Pares {order}', 'Polinomio Newton', 'Punto de raíz']
     handlelist = [plt.plot([], marker="o", ls="", color=color[i])[0] for i in range(3)]
     plt.legend(handlelist, labels, loc='upper left')
 
@@ -379,8 +379,8 @@ def graph_details_lagrange(pares, poly, root, order):
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
 
-    color = ['purple', 'blue', 'orange']
-    labels = ['Pares ordenados', 'Polinomio Lagrange', 'Punto de raíz']
+    color = ['blue', 'purple', 'orange']
+    labels = [f'Pares {order}', 'Polinomio Lagrange', 'Punto de raíz']
     handlelist = [plt.plot([], marker="o", ls="", color=color[i])[0] for i in range(3)]
     plt.legend(handlelist, labels, loc='upper left')
 
@@ -399,10 +399,10 @@ def graph_details_div_diff(pares, poly_coeffs, root, order):
     
     p_callable = my_poly_DD_format(poly_coeffs)
 
-    x_vals = np.linspace(x.min(), x.max(), 20)
+    x_vals = np.linspace(x.min(), x.max(), 100)
     y_vals = p_callable(x_vals)
 
-    plt.ylim(-50,50)
+    plt.ylim(-100, 100)
 
     plt.plot(x_vals, y_vals, color='red')
     
@@ -413,8 +413,8 @@ def graph_details_div_diff(pares, poly_coeffs, root, order):
     plt.xlabel("X")
     plt.ylabel("Y")
     
-    color = ['purple', 'red', 'orange']
-    labels = ['Pares ordenados', 'Polinomio Dif. Divididas', 'Punto de raíz']
+    color = ['blue', 'red', 'orange']
+    labels = [f'Pares {order}', 'Polinomio Dif. Divididas', 'Punto de raíz']
     handlelist = [plt.plot([], marker="o", ls="", color=color[i])[0] for i in range(3)]
     plt.legend(handlelist, labels, loc='upper left')
 
@@ -425,8 +425,8 @@ def graph_details_div_diff(pares, poly_coeffs, root, order):
     plt.show()
 
 # All graphs
-def graph_details_all(pares, poly_newton, poly_lagrange, poly_coeffs_dd, root_newton, root_lagrange, root_dd):
-    x, y = zip(*pares)
+def graph_details_all(pares, poly_newton, poly_lagrange, poly_coeffs_dd, order):
+    x, y = separador_pares_x_y(pares)
 
     fig, ax = plt.subplots()
     ax.scatter(x, y)
@@ -435,7 +435,7 @@ def graph_details_all(pares, poly_newton, poly_lagrange, poly_coeffs_dd, root_ne
     
     f_newton = sym.lambdify(sym.Symbol('x'), poly_newton)
     y_range_newton = f_newton(x_range)
-    ax.plot(x_range, y_range_newton, color='green', label='Polinomio Newton', linewidth=2)
+    ax.plot(x_range, y_range_newton, color='green', label='Polinomio Newton', linewidth=3)
 
     f_lagrange = sym.lambdify(sym.Symbol('x'), poly_lagrange)
     y_range_lagrange = f_lagrange(x_range)
@@ -445,16 +445,11 @@ def graph_details_all(pares, poly_newton, poly_lagrange, poly_coeffs_dd, root_ne
     y_range_dd = p_callable(x_range)
     ax.plot(x_range, y_range_dd, color='red', label='Polinomio Diferencias Divididas')
 
-    ax.plot(root_newton, 0, color='orange', marker='o', label='Punto de raíz Newton')
-    ax.plot(root_lagrange, 0, color='blue', marker='o', label='Punto de raíz Lagrange')
-    if not np.isnan(root_dd):
-        ax.plot(root_dd, 0, color='yellow', marker='o', label='Punto de raíz Diferencias Divididas')
-
-    ax.set_title("Gráfico de Pares ordenados y Polinomios")
+    ax.set_title(f"Gráfico de Pares {order} y Polinomios")
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
 
-    plt.ylim(-150,150)
+    plt.ylim(-100, 100)
     plt.legend()
     plt.grid(True)
     plt.gca().set_facecolor('#e9edc9')
@@ -631,6 +626,10 @@ print("                                                                         
 root_DD = my_newton_DD(poly_DD, x_0 = -20)   
 graph_details_div_diff(pares, poly_DD, root_DD, order)
 print("                                                                                  ")
+
+# Grafico de las tres funciones superpuestas
+graph_details_all(pares, poly_N, poly_L, poly_DD, order)
+
 #________________________________________________________________________________________________
 print("                      ********* PARES DESCENDENTES *********                      ")
 inversed = inversor_pares(pares)
@@ -663,6 +662,10 @@ print("                                                                         
 root_DD = my_newton_DD(poly_DD, x_0 = -20)   
 graph_details_div_diff(inversed, poly_DD, root_DD, order)
 print("                                                                                  ")
+
+# Grafico de las tres funciones superpuestas
+graph_details_all(pares, poly_N, poly_L, poly_DD, order)
+
 #________________________________________________________________________________________________
 print("                      ********* PARES ALEATORIZADOS *********                     ")
 randomness = pares
@@ -698,7 +701,8 @@ graph_details_div_diff(randomness, poly_DD, root_DD, order)
 print("                                                                                  ")
 
 # Grafico de las tres funciones superpuestas
-graph_details_all(pares, poly_N, poly_L, poly_DD, root_N, root_L, root_DD)
+graph_details_all(pares, poly_N, poly_L, poly_DD, order)
+
 ## IV) Conclusions
 print("                                                                                  ")
 print("**********************************************************************************")
