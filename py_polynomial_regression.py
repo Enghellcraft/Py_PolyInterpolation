@@ -174,8 +174,8 @@ def generador_pares(cota_minima, cota_maxima):
 
     # Para evitar errores de un mismo valor xi con varios yi, el replace=False hace que no peudan repetirse esos 
     # numeros aleatorios. En el caso de yi puede repetirse. Cumpliendo con la Inyectividad
-    x_set = np.random.choice(rango, size=3, replace=False)
-    y_set = np.random.choice(rango, size=3, replace=True)
+    x_set = np.random.choice(rango, size=20, replace=False)
+    y_set = np.random.choice(rango, size=20, replace=True)
 
     # Ordena los pares de forma ascendente
     lista_pares = list(zip(x_set, y_set))
@@ -379,25 +379,16 @@ def graph_details_div_diff(pares, poly_coeffs, root):
 
     plt.scatter(x, y)
     
-    # Se calcula el grado del polinomio como <= a n
-    n = len(pares)
-    
-    
-    p_callable = np.poly1d(np.array(poly_coeffs))
+    p_callable = my_poly_DD_format(poly_coeffs)
 
-    # Declaro el simbolo como x
-    # x = sym.Symbol('x')
-
-    # Conversion de polinomio string a simbolo
-    # poly_expr = sym.sympify(poly_str)
-    # poly_func = sym.lambdify(x, poly_expr)
-
-    x_vals = np.linspace(x.min(), x.max(), 5)
+    x_vals = np.linspace(x.min(), x.max())
     y_vals = p_callable(x_vals)
+
+    plt.ylim(-200,200)
 
     plt.plot(x_vals, y_vals, color='red')
     
-    plot(root, 0, color='orange', marker='o')
+    plt.plot(root, 0, color='orange', marker='o')
 
     plt.title("Gráfico de Pares ordenados y Polinomio Diferencias Divididas")
     plt.xlabel("X")
@@ -541,8 +532,8 @@ print("                     ********* DIFERENCIAS DIVIDIDAS *********           
 poly_DD = my_divided_diff_poly(pares)
 print("                                                                                  ")
 # Se toma un x0 = 1
-my_newton_DD(poly_DD, x_0 = 1)
-#graph_details_div_diff(pares, poly_DD, root_DD)
+# my_newton_DD(poly_DD, x_0 = 1)
+graph_details_div_diff(pares, poly_DD, 0)
 print("                                                                                  ")
 #________________________________________________________________________________________________
 print("                      ********* PARES DESCENDENTES *********                      ")
@@ -573,7 +564,7 @@ poly_DD = my_divided_diff_poly(inversed)
 print("                                                                                  ")
 # Se toma un x0 = 1
 my_newton_DD(poly_DD, x_0 = 1)   
-#graph_details_div_diff(pares, poly_DD)
+graph_details_div_diff(pares, poly_DD, 0)
 print("                                                                                  ")
 #________________________________________________________________________________________________
 print("                      ********* PARES ALEATORIZADOS *********                     ")
@@ -605,7 +596,7 @@ poly_DD = my_divided_diff_poly(randomness)
 print("                                                                                  ")
 # Se toma un x0 = 1
 my_newton_DD(poly_DD, x_0 = 1)   
-#graph_details_div_diff(pares, poly_DD)
+graph_details_div_diff(pares, poly_DD, 0)
 print("                                                                                  ")
 
 ## IV) Conclusions
