@@ -225,7 +225,7 @@ def my_newton(poly, x0):
         
         # Verifica que la derivada primera no sea cero, ya que no aseura su convergencia a una raíz
         if df == 0:
-            return print("No converge o lo hara con gran error ya que la derivada de la funcion es Cero")
+            return print("No converge a raiz o lo hara con gran error, ya que la derivada de la funcion es Cero")
 
         f_x0 = funcion.subs({x: x0}).evalf()
         
@@ -263,7 +263,7 @@ def my_newton_DD(coef, x_0):
     for i in range(150):
         i += i
         if derivative_poly(x_0) == 0:
-            print(f"La derivada en este Punto x = {x_0} es cero y no se puede continuar")
+            print(f"La derivada en este Punto x = {x_0} es cero y no se puede continuar la busqueda de una raiz")
             return root
         der_val = derivative_poly(x_0)
         if abs(der_val) < e:
@@ -272,16 +272,16 @@ def my_newton_DD(coef, x_0):
             return root
         poly_val = poly(x_0)
         if np.isnan(der_val) or np.isnan(poly_val):
-            print(f"En el punto x = {x_0} se encuentra un NaN y no se peude continuar")
+            print(f"En el punto x = {x_0} se encuentra un NaN y no se puede continuar la busqueda de una raiz")
             return root
         log_poly_val = np.log(np.abs(poly_val))
         log_der_val = np.log(np.abs(der_val))
         if np.isinf(log_poly_val) or np.isinf(log_der_val):
-            print(f"En el punto x = {x_0} se encuentra un infinito y no se peude continuar")
+            print(f"En el punto x = {x_0} se encuentra un infinito y no se puede continuar la busqueda de una raiz")
             return root
         log_x_n = np.log(np.abs(x_0)) - log_poly_val + log_der_val
         if np.isinf(log_x_n):
-            print(f"En el punto x = {x_0} se encuentra un infinito y no se peude continuar")
+            print(f"En el punto x = {x_0} se encuentra un infinito y no se puede continuar la busqueda de una raiz")
             return root
         x_n = np.sign(poly_val) * np.exp(log_x_n)
         x_0 = x_n
@@ -289,7 +289,6 @@ def my_newton_DD(coef, x_0):
             # Si no se encuentra un raiz al máximo de iteraciones establecido:
             print("No se ha encontrado una raiz en 150 iteraciones")
             return root
-
 
 # ------------------------------------------------------------------------------------------------------------        
 # Format Print
@@ -444,13 +443,44 @@ def graph_details_all_pairs_n_l(pares, poly_asc, poly_inv, poly_rand, pol_type):
     
     f_asc = sym.lambdify(sym.Symbol('x'), poly_asc)
     y_range_asc = f_asc(x_range)
-    ax.plot(x_range, y_range_asc, color='green', label='Polinomio obtenido con pares ordenados', linewidth=4)
+    ax.plot(x_range, y_range_asc, color='green', label='Polinomio obtenido con pares ordenados', linewidth=6)
 
     f_inv = sym.lambdify(sym.Symbol('x'), poly_inv)
     y_range_inv = f_inv(x_range)
-    ax.plot(x_range, y_range_inv, color='gray', label='Polinomio obtenido con pares invertidos')
+    ax.plot(x_range, y_range_inv, color='yellow', label='Polinomio obtenido con pares invertidos', linewidth=4)
 
     f_rand = sym.lambdify(sym.Symbol('x'), poly_rand)
+    y_range_rand = f_rand(x_range)
+    ax.plot(x_range, y_range_rand, color='red', label='Polinomio obtenido con pares aleatorizados')
+    
+    ax.set_title(f"Gráfico de Pares y Polinomios obtenidos por {pol_type}")
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+
+    # plt.ylim(-100, 100)
+    plt.legend()
+    plt.grid(True)
+    plt.gca().set_facecolor('#e9edc9')
+
+    plt.show()
+
+def graph_details_all_pairs_DD(pares, poly_asc, poly_inv, poly_rand, pol_type):
+    x, y = separador_pares_x_y(pares)
+
+    fig, ax = plt.subplots()
+    ax.scatter(x, y)
+
+    x_range = np.linspace(min(x), max(x), 50)
+    
+    f_asc = my_poly_DD_format(poly_asc)
+    y_range_asc = f_asc(x_range)
+    ax.plot(x_range, y_range_asc, color='green', label='Polinomio obtenido con pares ordenados')
+
+    f_inv = my_poly_DD_format(poly_inv)
+    y_range_inv = f_inv(x_range)
+    ax.plot(x_range, y_range_inv, color='red', label='Polinomio obtenido con pares invertidos')
+
+    f_rand = my_poly_DD_format(poly_rand)
     y_range_rand = f_rand(x_range)
     ax.plot(x_range, y_range_rand, color='orange', label='Polinomio obtenido con pares aleatorizados')
     
@@ -458,7 +488,7 @@ def graph_details_all_pairs_n_l(pares, poly_asc, poly_inv, poly_rand, pol_type):
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
 
-    # plt.ylim(-100, 100)
+    plt.ylim(-100, 100)
     plt.legend()
     plt.grid(True)
     plt.gca().set_facecolor('#e9edc9')
@@ -707,6 +737,7 @@ graph_details_all(pares, poly_N_rand, poly_L_rand, poly_DD_rand, order)
 # Graficos de las 3 funciones obtenidas segun orden
 graph_details_all_pairs_n_l(pares, poly_N_asc, poly_N_inv, poly_N_rand, "Newton")
 graph_details_all_pairs_n_l(pares, poly_L_asc, poly_L_inv, poly_L_rand, "Lagrange")
+graph_details_all_pairs_DD(pares, poly_DD_asc, poly_DD_inv, poly_DD_rand, "Diferencias Divididas")
 
 ## IV) Conclusions
 print("                                                                                  ")
